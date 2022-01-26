@@ -16,8 +16,6 @@ PGEFFECTIVE=$(($(free -m|awk '/^Mem:/{print $2}')/2))
 PROJECT_NAME=testcluster
 PROJECT_DIRECTORY=/var/www/${PROJECT_NAME}
 DEPLOY_USER=vagrant
-PGPASS=/home/${DEPLOY_USER}/.pgpass
-PGRC=/home/${DEPLOY_USER}/.psqlrc
 
 # Screen colors using tput
 

@@ -11,7 +11,6 @@ fi
 
 echo "${GREEN}Setting up configuration${RESET}"
 
-# export IP=$IP
 
 function fix_locales {
     echo "${GREEN}Fix locales${RESET}"
@@ -25,16 +24,27 @@ function fix_locales {
     locale-gen
 }
 
+function isinstalled {
+  if yum list installed "$@" >/dev/null 2>&1; then
+    true
+  else
+    false
+  fi
+}
+
 function install_configure_packages {
     echo "${GREEN}Installing tools${RESET}"
-    sudo yum -y install nodejs haproxy keepalived pgbouncer git openssl curl wget
+    sudo yum -y install nodejs haproxy keepalived pgbouncer git openssl curl wget net-tools
 
     # curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
     curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 
+    # get our IP address
+    MY_IP=`ifconfig  | grep -E -o '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'`
+    # export IP=$MY_IP
 
     echo "${GREEN}Stopping haproxy${RESET}"
-	[ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy stop
+    [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy stop
 
     # mkdir /etc/haproxy/certs.d
 
@@ -42,7 +52,7 @@ function install_configure_packages {
     #sudo openssl dhparam -dsaparam -out /etc/haproxy/dhparam.pem 4096
 
     echo "${GREEN}Starting haproxy${RESET}"
-	[ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy start
+    [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy start
 }
 
 function load_postgres_sqlfiles {
@@ -60,6 +70,10 @@ function load_postgres_sqlfiles {
 }
 
 function create_pgpass {
+    # detect the home of postgres user
+    PGHOME=`getent passwd postgres | awk -F: '{ print $6 }'`
+    PGPASS=${PGHOME}/.pgpass
+
     echo "${GREEN}Checking pgpass${RESET}"
     if [ ! -e "${PGPASS}" ]; then
         echo "create ${PGPASS}"
@@ -71,10 +85,26 @@ function create_pgpass {
         if [ ! "${PERMS}" = "0600" ]; then
             chmod 0600 ${PGPASS}
         fi
-        cp /tmp/rcfiles/psqlrc $PGRC
 
-        chown -R ${DEPLOY_USER}:${DEPLOY_USER} $PGPASS $PGRC
+        #chown -R ${DEPLOY_USER}:${DEPLOY_USER} $PGPASS $PGRC
+        chown -R postgres:postgres $PGPASS  # $PGRC
+        PERMS=$(stat -c "%a" ${PGPASS})
+        if [ ! "${PERMS}" = "0600" ]; then
+            chmod 0600 ${PGPASS}
+        fi
     fi
+}
+
+function create_pgrc {
+   # # install my own psqlrc
+   # echo "${GREEN}Creating .pgsqlrc${RESET}"
+   # cp /tmp/rcfiles/psqlrc $PGRC
+   # chown -R ${DEPLOY_USER}:${DEPLOY_USER} $PGRC
+
+    # install postgres .psqlrc file
+    # cp /tmp/rcfiles/psqlrc $PGRC
+    sudo cp /tmp/rcfiles/psqlrc /var/lib/pgsql/.psqlrc
+    sudo chown -R postgres:postgres /var/lib/pgsql/.psqlrc
 }
 
 # Create an aliases file so we can use short commands to navigate a project
@@ -167,21 +197,44 @@ function install_extra_packages {
             curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
         fi
     fi
-
-
-        if [ "$DISTRIB_RELEASE" = "18.04" ]; then
-            if [ ! -e "/usr/local/bin/composer" ]; then
-                echo "Updating global Composer ..."
-                curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-            fi
-        fi
 }
 
 function install_configure_postgres {
     # DB server
     if [ "${RES_ARRAY[1]}" = "db" ]; then
-        # test for postgres install
-        if [ $(dpkg-query -W -f='${Status}' postgresql 2>/dev/null | grep -c "ok installed") -eq 0 ]; then
+
+    echo "${GREEN}Install PG specific packages ...${RESET}"
+
+    echo "${GREEN}Install EPEL packages ...${RESET}"
+    sudo yum -d1 -q -y install sipcalc ccze yum-utils
+
+    #sudo yum install -d1 -y http://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat11-11-2.noarch.rpm
+    sudo yum -d1 -q -y install http://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    #sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+
+    sudo yum-config-manager --enable pgdg11
+
+    echo "Install PG 11 packages ..."
+
+    sudo yum -d1 -q -y install postgresql11.x86_64 postgresql11-contrib.x86_64 postgresql11-libs.x86_64 postgresql11-server.x86_64
+
+    echo "Install PG 11 extensions ..."
+    sudo yum -d1 -q -y install repmgr11.x86_64 powa_11.x86_64 powa_11-web.x86_64 pg_stat_kcache11.x86_64 pg_qualstats11.x86_64 pg_repack11.x86_64
+
+    #echo "Install PG 11 barman cli ..."
+    #sudo yum -d1 -q -y install barman-cli
+
+    echo "Init database ... $1 / $2 "
+    sudo /usr/pgsql-11/bin/postgresql-11-setup initdb
+
+    echo "Enable startup service database ... $1 / $2 "
+    sudo systemctl enable --now postgresql-11
+
+    echo "Start database ... $1 / $2 "
+    sudo systemctl status postgresql-11
+
+    # test for postgres install
+    if isinstalled postgresql ; then
             echo "Setting up shared mem"
             chmod +x /usr/local/bin/shmsetup.sh
             /usr/local/bin/shmsetup.sh >> /etc/sysctl.conf
@@ -286,6 +339,9 @@ function configure_credentials {
 
 echo "${GREEN}Start provisioning postgresql ${RESET}"
 
+sudo yum -d1 -q -y update
+#sudo yum -d1 -q -y install keepalived pgbouncer haproxy
+
 #fix_locales
 create_deploy_user
 #install_extra_packages
@@ -293,7 +349,7 @@ install_configure_packages
 install_git_repos
 #make_work_dirs
 #configure_credentials
-create_pgpass
+#create_pgpass
 install_configure_postgres
 #load_postgres_sqlfiles
 #create_bash_alias
