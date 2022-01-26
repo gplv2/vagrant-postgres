@@ -62,7 +62,7 @@ Vagrant.configure("2") do |config|
 
         db1.vm.provision "shell" do |s|
             s.name = "Installing vagrant bootstrap"
-            s.inline = localscriptDir + "/install.sh"
+            s.inline = "sudo " + localscriptDir + "/install.sh"
         end
 
         # Provider-specific configuration so you can fine-tune various
@@ -141,7 +141,7 @@ Vagrant.configure("2") do |config|
 
         db2.vm.provision "shell" do |s|
             s.name = "Installing vagrant bootstrap"
-            s.inline = localscriptDir + "/install.sh"
+            s.inline = "sudo " + localscriptDir + "/install.sh"
         end
 
         # Provider-specific configuration so you can fine-tune various

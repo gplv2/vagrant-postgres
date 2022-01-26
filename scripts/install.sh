@@ -11,7 +11,6 @@ fi
 
 echo "${GREEN}Setting up configuration${RESET}"
 
-
 function fix_locales {
     echo "${GREEN}Fix locales${RESET}"
     # fix locales
@@ -202,7 +201,6 @@ function install_extra_packages {
 function install_configure_postgres {
     # DB server
     if [ "${RES_ARRAY[1]}" = "db" ]; then
-
     echo "${GREEN}Install PG specific packages ...${RESET}"
 
     echo "${GREEN}Install EPEL packages ...${RESET}"
@@ -212,9 +210,12 @@ function install_configure_postgres {
     sudo yum -d1 -q -y install http://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
     #sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
-    sudo yum-config-manager --enable pgdg11
+    echo "${GREEN}Running yum update...${RESET}"
+    sudo yum -d1 -q -y update
+
 
     echo "Install PG 11 packages ..."
+    sudo yum-config-manager --enable pgdg11
 
     sudo yum -d1 -q -y install postgresql11.x86_64 postgresql11-contrib.x86_64 postgresql11-libs.x86_64 postgresql11-server.x86_64
 
@@ -339,11 +340,8 @@ function configure_credentials {
 
 echo "${GREEN}Start provisioning postgresql ${RESET}"
 
-sudo yum -d1 -q -y update
-#sudo yum -d1 -q -y install keepalived pgbouncer haproxy
-
 #fix_locales
-create_deploy_user
+#create_deploy_user
 #install_extra_packages
 install_configure_packages
 install_git_repos
