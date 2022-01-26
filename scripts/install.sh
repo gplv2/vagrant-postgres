@@ -134,7 +134,7 @@ function install_git_repos {
     fi
 
     echo "${GREEN}Install GIT repos${RESET}"
-    su - ${DEPLOY_USER} -c "git@github.com:gplv2/haproxy-postgresql.git haproxy-postgres"
+    su - ${DEPLOY_USER} -c "git clone git@github.com:gplv2/haproxy-postgresql.git haproxy-postgres"
 
     #su - ${DEPLOY_USER} -c "cd grb2pgsql && git submodule init"
     #su - ${DEPLOY_USER} -c "cd grb2pgsql && git submodule update --recursive --remote"
