@@ -119,7 +119,7 @@ EOF
 function install_git_repos {
 
     echo "${GREEN}Accept github keys in advance${RESET}"
-    if [ -f /home/${DEPLOY_USER}/ssh/known_hosts ] 
+    if [ -f /home/${DEPLOY_USER}/ssh/known_hosts ] ; then
         if ! cat /home/${DEPLOY_USER}/ssh/known_hosts | grep -q "github"; then
             echo "Adding SSH github host key"
             ssh-keyscan github.com >> /home/${DEPLOY_USER}/.ssh/known_hosts
