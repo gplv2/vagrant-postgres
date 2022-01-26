@@ -88,6 +88,7 @@ Vagrant.configure("2") do |config|
         #   apt-get install -y apache2
         # SHELL
         #
+    end
     config.vm.define "db2" do |db2|
         # Every Vagrant development environment requires a box. You can search for
         # boxes at https://atlas.hashicorp.com/search.
