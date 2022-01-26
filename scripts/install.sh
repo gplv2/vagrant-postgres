@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/usr/bin/env bash 
 
 set -o allexport
 source /vagrant/scripts/variables
@@ -36,7 +36,7 @@ function install_configure_packages {
     sudo yum -y install nodejs haproxy keepalived pgbouncer git openssl curl wget net-tools
 
     # curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-    curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    # curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 
     # get our IP address
     MY_IP=`ifconfig  | grep -E -o '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'`
@@ -119,9 +119,14 @@ EOF
 function install_git_repos {
 
     echo "${GREEN}Accept github keys in advance${RESET}"
-    if ! cat /root/ssh/known_hosts | grep -q "github"; then
+    if [ -f /home/${DEPLOY_USER}/ssh/known_hosts ] 
+        if ! cat /home/${DEPLOY_USER}/ssh/known_hosts | grep -q "github"; then
+            echo "Adding SSH github host key"
+            ssh-keyscan github.com >> /home/${DEPLOY_USER}/.ssh/known_hosts
+        fi
+    else
         echo "Adding SSH github host key"
-        ssh-keyscan github.com >> /root/.ssh/known_hosts
+        ssh-keyscan github.com >> /home/${DEPLOY_USER}/.ssh/known_hosts
     fi
 
     if ! cat /home/${DEPLOY_USER}/.ssh/known_hosts | grep -q "github"; then
