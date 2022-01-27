@@ -10,11 +10,11 @@ Vagrant.configure("2") do |config|
     # https://docs.vagrantup.com.
     #
     (1..NODE_COUNT).each do |i|
-        config.vm.define "db#{$i}" do |subconfig|
+        config.vm.define "db#{i}" do |subconfig|
             # Every Vagrant development environment requires a box. You can search for
             # boxes at https://atlas.hashicorp.com/search.
             subconfig.vm.box = BOX_IMAGE
-            subconfig.vm.hostname = "db#{$i}"
+            subconfig.vm.hostname = "db#{i}"
 
             #subconfig.vm.network "private_network", ip: "192.168.50.5"
             subconfig.vm.network :private_network, ip: "192.168.88.#{i + 10}"

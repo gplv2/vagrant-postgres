@@ -361,7 +361,7 @@ echo "${GREEN}Start provisioning postgresql ${RESET}"
 #fix_locales
 #create_deploy_user
 #install_extra_packages
-yum_update
+#yum_update
 install_configure_packages
 install_git_repos
 #make_work_dirs
