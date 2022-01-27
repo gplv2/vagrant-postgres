@@ -136,8 +136,13 @@ function install_git_repos {
     echo "${GREEN}Install GIT repos${RESET}"
     su - ${DEPLOY_USER} -c "git clone https://github.com/gplv2/haproxy-postgresql.git"
 
-    #su - ${DEPLOY_USER} -c "cd grb2pgsql && git submodule init"
-    #su - ${DEPLOY_USER} -c "cd grb2pgsql && git submodule update --recursive --remote"
+}
+
+function yum_update{
+	# perform an update of the system to bring everything up to the latest version 
+    echo "${GREEN}Running yum update...${RESET}"
+    sudo yum -d1 -q -y update
+    echo "${GREEN}Done yum update...${RESET}"
 }
 
 function make_work_dirs {
@@ -216,8 +221,6 @@ function install_configure_postgres {
 
     #sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
-    #echo "${GREEN}Running yum update...${RESET}"
-    #sudo yum -d1 -q -y update
     echo "Disable stock postgresql..."
     sudo yum-config-manager  --save --setopt=base.exclude=postgres*;
     sudo yum-config-manager  --save --setopt=updates.exclude=postgres*;
@@ -240,13 +243,13 @@ function install_configure_postgres {
     echo "Enable startup service database ... $1 / $2 "
     sudo systemctl enable --now postgresql-11
 
-    echo "Start database ... $1 / $2 "
+    echo "Status database ... $1 / $2 "
     sudo systemctl status postgresql-11
 
     echo "${GREEN}Checking if postgres is installed ...${RESET}"
     # test for postgres install
     if isinstalled postgresql11 ; then
-    	echo "${GREEN}Tuning configuration${RESET}"
+		echo "${GREEN}Tuning configuration${RESET}"
         #echo "Setting up shared mem"
         #chmod +x /usr/local/bin/shmsetup.sh
         #/usr/local/bin/shmsetup.sh >> /etc/sysctl.conf
@@ -292,6 +295,8 @@ function install_configure_postgres {
                 sed -i "s/#checkpoint_completion_target = 0.5/checkpoint_completion_target = 0.7/" ${PGCONF}
             fi
             echo "Done with changing postgresql settings, we need to restart postgres for them to take effect"
+			echo "${GREEN}Restarting Postgresql 11 ${RESET}"
+    		systemctl restart postgresql-11
         fi
 
         # set permissions
@@ -357,6 +362,7 @@ echo "${GREEN}Start provisioning postgresql ${RESET}"
 #fix_locales
 #create_deploy_user
 #install_extra_packages
+yum_update
 install_configure_packages
 install_git_repos
 #make_work_dirs
