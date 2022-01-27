@@ -239,8 +239,10 @@ function install_configure_postgres {
     echo "Start database ... $1 / $2 "
     sudo systemctl status postgresql-11
 
+    echo "${GREEN}Checking if postgres is installed ...${RESET}"
     # test for postgres install
-    if isinstalled postgresql ; then
+    if isinstalled postgresql11 ; then
+    	echo "${GREEN}Tuning configuration${RESET}"
         #echo "Setting up shared mem"
         #chmod +x /usr/local/bin/shmsetup.sh
         #/usr/local/bin/shmsetup.sh >> /etc/sysctl.conf
@@ -267,7 +269,7 @@ function install_configure_postgres {
                 # converting this to a safe GB value for postgres
                 sed -i -r "s|#?effective_cache_size =".*"$|effective_cache_size = ${PGEFFECTIVE}MB|" ${PGCONF}
 
-                    postgres_shared=`expr $shmmax / 1024 / 1024 / 1000`
+                postgres_shared=`expr $shmmax / 1024 / 1024 / 1000`
 
                 echo "Postgres shared buffer size in GB: ${postgres_shared}"
                 echo "Configuring memory settings"
