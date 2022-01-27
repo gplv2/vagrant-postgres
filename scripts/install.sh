@@ -122,11 +122,11 @@ function install_git_repos {
     if [ -f /home/${DEPLOY_USER}/ssh/known_hosts ] ; then
         if ! cat /home/${DEPLOY_USER}/ssh/known_hosts | grep -q "github"; then
             echo "Adding SSH github host key"
-            ssh-keyscan github.com >> /home/${DEPLOY_USER}/.ssh/known_hosts
+            su - ${DEPLOY_USER} -c "ssh-keyscan github.com >> /home/${DEPLOY_USER}/.ssh/known_hosts"
         fi
     else
         echo "Adding SSH github host key"
-        ssh-keyscan github.com >> /home/${DEPLOY_USER}/.ssh/known_hosts
+        su - ${DEPLOY_USER} -c "ssh-keyscan github.com >> /home/${DEPLOY_USER}/.ssh/known_hosts"
     fi
 
     if ! cat /home/${DEPLOY_USER}/.ssh/known_hosts | grep -q "github"; then
@@ -134,7 +134,7 @@ function install_git_repos {
     fi
 
     echo "${GREEN}Install GIT repos${RESET}"
-    su - ${DEPLOY_USER} -c "git clone git@github.com:gplv2/haproxy-postgresql.git haproxy-postgres"
+    su - ${DEPLOY_USER} -c "git clone https://github.com/gplv2/haproxy-postgresql.git"
 
     #su - ${DEPLOY_USER} -c "cd grb2pgsql && git submodule init"
     #su - ${DEPLOY_USER} -c "cd grb2pgsql && git submodule update --recursive --remote"
@@ -205,7 +205,6 @@ function install_extra_packages {
 
 function install_configure_postgres {
     # DB server
-    if [ "${RES_ARRAY[1]}" = "db" ]; then
     echo "${GREEN}Install PG specific packages ...${RESET}"
 
     echo "${GREEN}Install EPEL packages ...${RESET}"
@@ -241,65 +240,67 @@ function install_configure_postgres {
 
     # test for postgres install
     if isinstalled postgresql ; then
-            echo "Setting up shared mem"
-            chmod +x /usr/local/bin/shmsetup.sh
-            /usr/local/bin/shmsetup.sh >> /etc/sysctl.conf
+        #echo "Setting up shared mem"
+        #chmod +x /usr/local/bin/shmsetup.sh
+        #/usr/local/bin/shmsetup.sh >> /etc/sysctl.conf
 
-            echo "${GREEN}Installing postgres DB server ...${RESET}"
+        echo "${GREEN}Installing postgres DB server ...${RESET}"
 
-            # enable listen
-            if [ -e "/etc/postgresql/10/main/postgresql.conf" ]; then
-                echo "Enable listening on all interfaces"
-                sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/10/main/postgresql.conf
-                echo "Configuring shared buffers"
-                page_size=`getconf PAGE_SIZE`
-                phys_pages=`getconf _PHYS_PAGES`
+        PGCONF="/var/lib/pgsql/11/data/postgresql.conf"
+        PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
 
-                if [ -z "phys_pages" ]; then
-                    echo "Error:  cannot determine page size"
-                else
-                    shmall=`expr $phys_pages / 2`
-                    shmmax=`expr $shmall \* $page_size`
-                    echo "Maximum shared segment size in bytes: ${shmmax}"
-                    # converting this to a safe GB value for postgres
-                    sed -i -r "s|#?effective_cache_size =".*"$|effective_cache_size = ${PGEFFECTIVE}MB|" /etc/postgresql/10/main/postgresql.conf
+        # enable listen
+        if [ -e "${PGCONF}" ]; then
+            echo "Enable listening on all interfaces"
+            sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" ${PGCONF}
+            echo "Configuring shared buffers"
+            page_size=`getconf PAGE_SIZE`
+            phys_pages=`getconf _PHYS_PAGES`
 
-                    postgres_shared=`expr $shmmax / 1024 / 1024 / 1000`
-                    echo "Postgres shared buffer size in GB: ${postgres_shared}"
-                    echo "Configuring memory settings"
-                    sed -i "s/shared_buffers = 128MB/shared_buffers = ${postgres_shared}GB/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#work_mem = 4MB/work_mem = 8MB/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#maintenance_work_mem = 64MB/maintenance_work_mem = 2048MB/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#max_files_per_process = 1000/max_files_per_process = 10000/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#full_page_writes = on/full_page_writes = on/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#fsync = on/fsync = off/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#synchronous_commit = on/synchronous_commit = off/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#wal_level = minimal/wal_level = minimal/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#temp_buffers = 8MB/temp_buffers = 32MB/" /etc/postgresql/10/main/postgresql.conf
-                    echo "Configuring checkpoint settings"
-                    sed -i "s/#checkpoint_timeout = 5min/checkpoint_timeout = 20min/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#max_wal_size = 1GB/max_wal_size = 2GB/" /etc/postgresql/10/main/postgresql.conf
-                    sed -i "s/#checkpoint_completion_target = 0.5/checkpoint_completion_target = 0.7/" /etc/postgresql/10/main/postgresql.conf
-                fi
-                echo "Done with changing postgresql settings, we need to restart postgres for them to take effect"
+            if [ -z "phys_pages" ]; then
+                echo "Error:  cannot determine page size"
+            else
+                shmall=`expr $phys_pages / 2`
+                shmmax=`expr $shmall \* $page_size`
+                echo "Maximum shared segment size in bytes: ${shmmax}"
+                # converting this to a safe GB value for postgres
+                sed -i -r "s|#?effective_cache_size =".*"$|effective_cache_size = ${PGEFFECTIVE}MB|" ${PGCONF}
+
+                postgres_shared=`expr $shmmax / 1024 / 1024 / 1000`
+
+                echo "Postgres shared buffer size in GB: ${postgres_shared}"
+                echo "Configuring memory settings"
+                sed -i "s/shared_buffers = 128MB/shared_buffers = ${postgres_shared}GB/" ${PGCONF}
+                sed -i "s/#work_mem = 4MB/work_mem = 8MB/" ${PGCONF}
+                sed -i "s/#maintenance_work_mem = 64MB/maintenance_work_mem = 2048MB/" ${PGCONF}
+                sed -i "s/#max_files_per_process = 1000/max_files_per_process = 10000/" ${PGCONF}
+                sed -i "s/#full_page_writes = on/full_page_writes = on/" ${PGCONF}
+                sed -i "s/#fsync = on/fsync = off/" ${PGCONF}
+                sed -i "s/#synchronous_commit = on/synchronous_commit = off/" ${PGCONF}
+                sed -i "s/#wal_level = minimal/wal_level = minimal/" ${PGCONF}
+                sed -i "s/#temp_buffers = 8MB/temp_buffers = 32MB/" ${PGCONF}
+                echo "Configuring checkpoint settings"
+                sed -i "s/#checkpoint_timeout = 5min/checkpoint_timeout = 20min/" ${PGCONF}
+                sed -i "s/#max_wal_size = 1GB/max_wal_size = 2GB/" ${PGCONF}
+                sed -i "s/#checkpoint_completion_target = 0.5/checkpoint_completion_target = 0.7/" ${PGCONF}
             fi
-
-            # set permissions
-            if [ -e "/etc/postgresql/10/main/pg_hba.conf" ]; then
-                #echo "host    all             all             $SUBNET           trust" >> /etc/postgresql/10/main/pg_hba.conf
-                #sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/10/main/postgresql.conf
-                sed -i "s/host    all             all             127.0.0.1\/32            md5/#host    all             all             127.0.0.1\/32            md5/" /etc/postgresql/10/main/pg_hba.conf
-                echo "host    all             all             127.0.0.1/32           trust" >> /etc/postgresql/10/main/pg_hba.conf
-            fi
-
-            echo "Welcome to Resource ${RESOURCE_INDEX} - ${HOSTNAME} (${IP})"
-
-            # install my .psqlrc file
-            cp /tmp/rcfiles/psqlrc /var/lib/postgresql/.psqlrc
-
+            echo "Done with changing postgresql settings, we need to restart postgres for them to take effect"
         fi
-    fi
-}
+
+        # set permissions
+        if [ -e "${PGHBA}" ]; then
+            #echo "host    all             all             $SUBNET           trust" >> /etc/postgresql/10/main/pg_hba.conf
+            #sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" ${PGCONF}
+            sed -i "s/host    all             all             127.0.0.1\/32            md5/#host    all             all             127.0.0.1\/32            md5/" ${PGHBA}
+            echo "host    all             all             127.0.0.1/32           trust" >> ${PGHBA}
+        fi
+
+        #echo "Welcome to Resource ${RESOURCE_INDEX} - ${HOSTNAME} (${IP})"
+
+        # install my .psqlrc file
+        # cp /tmp/rcfiles/psqlrc /var/lib/postgresql/.psqlrc
+
+    }
 
 
 function configure_credentials {
