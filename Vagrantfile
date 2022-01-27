@@ -64,7 +64,7 @@ Vagrant.configure("2") do |config|
             # it will create a new disk called /dev/sdb and you need to mange it yourself
             # export VAGRANT_EXPERIMENTAL="disks"
             # it seem to work ok, it would be the disk to put postgresql data on when using big databases
-            subconfig.vm.disk :disk, size: "100GB", name: "extra_disk"
+            # subconfig.vm.disk :disk, size: "100GB", name: "extra_disk"
  
             subconfig.vm.provider "virtualbox" do |v|
                 v.customize ["modifyvm", :id, "--memory", 4096 ]
@@ -85,6 +85,10 @@ Vagrant.configure("2") do |config|
             subconfig.vm.provision "shell" do |s|
                 s.name = "Installing vagrant bootstrap"
                 s.inline = "sudo " + localscriptDir + "/install.sh"
+            end
+
+            config.push.define "local-exec" do |push|
+              push.script = "local/configure_pg_trust.sh"
             end
 
             # Provider-specific configuration so you can fine-tune various

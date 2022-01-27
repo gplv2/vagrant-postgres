@@ -52,6 +52,10 @@ function install_configure_packages {
 
     echo "${GREEN}Starting haproxy${RESET}"
     [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy start
+
+    sed -i 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
+
+    sudo service sshd restart
 }
 
 function load_postgres_sqlfiles {
@@ -117,7 +121,6 @@ EOF
 }
 
 function install_git_repos {
-
     echo "${GREEN}Accept github keys in advance${RESET}"
     if [ -f /home/${DEPLOY_USER}/ssh/known_hosts ] ; then
         if ! cat /home/${DEPLOY_USER}/ssh/known_hosts | grep -q "github"; then
@@ -135,7 +138,6 @@ function install_git_repos {
 
     echo "${GREEN}Install GIT repos${RESET}"
     su - ${DEPLOY_USER} -c "git clone https://github.com/gplv2/haproxy-postgresql.git"
-
 }
 
 function yum_update {
@@ -248,7 +250,7 @@ function install_configure_postgres {
     echo "${GREEN}Checking if postgres is installed ...${RESET}"
     # test for postgres install
     if isinstalled postgresql11 ; then
-		echo "${GREEN}Tuning configuration${RESET}"
+        echo "${GREEN}Tuning configuration${RESET}"
         #echo "Setting up shared mem"
         #chmod +x /usr/local/bin/shmsetup.sh
         #/usr/local/bin/shmsetup.sh >> /etc/sysctl.conf
@@ -294,8 +296,8 @@ function install_configure_postgres {
                 sed -i "s/#checkpoint_completion_target = 0.5/checkpoint_completion_target = 0.7/" ${PGCONF}
             fi
             echo "Done with changing postgresql settings, we need to restart postgres for them to take effect"
-			echo "${GREEN}Restarting Postgresql 11 ${RESET}"
-    		systemctl restart postgresql-11
+            echo "${GREEN}Restarting Postgresql 11 ${RESET}"
+            systemctl restart postgresql-11
         fi
 
         # set permissions
@@ -312,6 +314,19 @@ function install_configure_postgres {
         # cp /tmp/rcfiles/psqlrc /var/lib/postgresql/.psqlrc
     fi
 
+    # Setup trust on postgresql user level
+    PGHOME=`getent passwd postgres | awk -F: '{ print $6 }'`
+    # create the .ssh directories and files , which will be overwritten by a shared local generated one
+    sudo su -l postgres -c 'ssh-keygen -t rsa -q -f "${PGHOME}/.ssh/id_rsa" -N ""'
+
+    # now copy over the ones from tmp that was generated locally
+    sudo cat /vagrant/tmp/keys/id_rsa > ${PGHOME}/.ssh/id_rsa
+    sudo cat /vagrant/tmp/keys/id_rsa.pub > ${PGHOME}/.ssh/id_rsa.pub
+    sudo cat /vagrant/tmp/keys/id_rsa.pub > ${PGHOME}/.ssh/authorized_keys
+    #sudo chown -R postgres:postgres /var/lib/pgsql/.ssh
+    sudo chown -R postgres:postgres ${PGHOME}/.ssh/authorized_keys
+    sudo chmod 644 ${PGHOME}/.ssh/authorized_keys
+    #sudo chmod 600 /var/lib/pgsql/.ssh/id_rsa
 }
 
 
