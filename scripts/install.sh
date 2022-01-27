@@ -138,7 +138,7 @@ function install_git_repos {
 
 }
 
-function yum_update{
+function yum_update {
     echo "${GREEN}Updating system${RESET}"
     yum -d1 -q -y update
     echo "${GREEN}Update done${RESET}"
