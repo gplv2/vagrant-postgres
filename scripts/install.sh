@@ -218,14 +218,18 @@ function install_configure_postgres {
 
     #echo "${GREEN}Running yum update...${RESET}"
     #sudo yum -d1 -q -y update
+    echo "Disable stock postgresql..."
+    sudo yum-config-manager  --save --setopt=base.exclude=postgres*;
+    sudo yum-config-manager  --save --setopt=updates.exclude=postgres*;
 
     echo "Install PG 11 packages ..."
     sudo yum-config-manager --enable pgdg11
 
-    sudo yum -d1 -q -y install postgresql11.x86_64 postgresql11-contrib.x86_64 postgresql11-libs.x86_64 postgresql11-server.x86_64
+    sudo yum -d1 -q -y install postgresql11.x86_64 postgresql11-contrib.x86_64 postgresql11-libs.x86_64 postgresql11-server.x86_64 python36
 
     echo "Install PG 11 extensions ..."
-    sudo yum -d1 -q -y install repmgr11.x86_64 powa_11.x86_64 powa_11-web.x86_64 pg_stat_kcache11.x86_64 pg_qualstats11.x86_64 pg_repack11.x86_64
+    sudo yum -d1 -q -y install repmgr_11.x86_64 powa_11.x86_64 pg_stat_kcache_11.x86_64 pg_qualstats_11.x86_64 pg_repack_11.x86_64
+    #sudo yum -d1 -q -y install powa_11-web.x86_64  # powaweb is not resolving ok in repo
 
     #echo "Install PG 11 barman cli ..."
     #sudo yum -d1 -q -y install barman-cli
