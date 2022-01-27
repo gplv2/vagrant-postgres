@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+#BOX_IMAGE = "bento/centos-7"
 BOX_IMAGE = "centos/7"
 NODE_COUNT = 2
 
@@ -55,6 +56,16 @@ Vagrant.configure("2") do |config|
             # the path on the guest to mount the folder. And the optional third
             # argument is a set of non-required options.
             # subconfig.vm.synced_folder "../data", "/vagrant_data"
+            #
+            # this doesn't work too well , it resizes the disk but not the partition and the image doesn't use lvm
+            # subconfig.vm.disk :disk, size: "100GB", primary: true
+            #
+            # need to export this variable on the shell first to have this feature
+            # it will create a new disk called /dev/sdb and you need to mange it yourself
+            # export VAGRANT_EXPERIMENTAL="disks"
+            # it seem to work ok, it would be the disk to put postgresql data on when using big databases
+            subconfig.vm.disk :disk, size: "100GB", name: "extra_disk"
+ 
             subconfig.vm.provider "virtualbox" do |v|
                 v.customize ["modifyvm", :id, "--memory", 4096 ]
                 v.customize ["modifyvm", :id, "--cpus", 4 ]
