@@ -95,7 +95,9 @@ Vagrant.configure("2") do |config|
         end
     end
     # for mDNS
-    config.vm.provision "shell", inline: <<-SHELL
-  yum -y install avahi avahi-tools
-    SHELL
+    # disabling this crashes virtualbox with a fat error when you try to ping using db1.local of db2.local
+    #  HOSTRES[420474]: segfault at 7fa827926888 ip 00007fa8201c9685 sp 00007fa827926888 error 6 in libnss_mdns4_minimal.so.2[7fa8201c9000+2000]
+    #    config.vm.provision "shell", inline: <<-SHELL
+    #  yum -y install avahi avahi-tools
+    #    SHELL
 end
