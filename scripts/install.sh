@@ -139,10 +139,9 @@ function install_git_repos {
 }
 
 function yum_update{
-	# perform an update of the system to bring everything up to the latest version 
-    echo "${GREEN}Running yum update...${RESET}"
-    sudo yum -d1 -q -y update
-    echo "${GREEN}Done yum update...${RESET}"
+    echo "${GREEN}Updating system${RESET}"
+    yum -d1 -q -y update
+    echo "${GREEN}Update done${RESET}"
 }
 
 function make_work_dirs {
