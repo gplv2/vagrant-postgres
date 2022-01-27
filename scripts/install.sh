@@ -211,12 +211,13 @@ function install_configure_postgres {
     sudo yum -d1 -q -y install sipcalc ccze yum-utils
 
     #sudo yum install -d1 -y http://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat11-11-2.noarch.rpm
-    sudo yum -d1 -q -y install http://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    #sudo yum -d1 -q -y install http://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    sudo yum -d1 -q -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+
     #sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
-    echo "${GREEN}Running yum update...${RESET}"
-    sudo yum -d1 -q -y update
-
+    #echo "${GREEN}Running yum update...${RESET}"
+    #sudo yum -d1 -q -y update
 
     echo "Install PG 11 packages ..."
     sudo yum-config-manager --enable pgdg11
