@@ -317,12 +317,12 @@ function install_configure_postgres {
     # Setup trust on postgresql user level
     PGHOME=`getent passwd postgres | awk -F: '{ print $6 }'`
     # create the .ssh directories and files , which will be overwritten by a shared local generated one
-    sudo su -l postgres -c 'ssh-keygen -t rsa -q -f "${PGHOME}/.ssh/id_rsa" -N ""'
+    sudo su -l postgres -c "ssh-keygen -t rsa -q -f \"${PGHOME}/.ssh/id_rsa\" -N \"\""
 
     # now copy over the ones from tmp that was generated locally
-    sudo cat /vagrant/tmp/keys/id_rsa > ${PGHOME}/.ssh/id_rsa
-    sudo cat /vagrant/tmp/keys/id_rsa.pub > ${PGHOME}/.ssh/id_rsa.pub
-    sudo cat /vagrant/tmp/keys/id_rsa.pub > ${PGHOME}/.ssh/authorized_keys
+    sudo cat /vagrant/tmp/id_rsa > ${PGHOME}/.ssh/id_rsa
+    sudo cat /vagrant/tmp/id_rsa.pub > ${PGHOME}/.ssh/id_rsa.pub
+    sudo cat /vagrant/tmp/id_rsa.pub > ${PGHOME}/.ssh/authorized_keys
     #sudo chown -R postgres:postgres /var/lib/pgsql/.ssh
     sudo chown -R postgres:postgres ${PGHOME}/.ssh/authorized_keys
     sudo chmod 644 ${PGHOME}/.ssh/authorized_keys

@@ -4,12 +4,19 @@
 #BOX_IMAGE = "bento/centos-7"
 BOX_IMAGE = "centos/7"
 NODE_COUNT = 2
+IP_PREFIX="192.168.88."
 
 Vagrant.configure("2") do |config|
     # The most common configuration options are documented and commented below.
     # For a complete reference, please see the online documentation at
     # https://docs.vagrantup.com.
-    #
+    #  create ip list
+    (1..NODE_COUNT).each do |i|
+        config.push.define "local-exec" do |push|
+            push.script = "echo "+IP_PREFIX+"#{i + 10} >> iplist.txt"
+        end
+    end
+
     (1..NODE_COUNT).each do |i|
         config.vm.define "db#{i}" do |subconfig|
             # Every Vagrant development environment requires a box. You can search for
@@ -18,7 +25,7 @@ Vagrant.configure("2") do |config|
             subconfig.vm.hostname = "db#{i}"
 
             #subconfig.vm.network "private_network", ip: "192.168.50.5"
-            subconfig.vm.network :private_network, ip: "192.168.88.#{i + 10}"
+            subconfig.vm.network :private_network, ip: IP_PREFIX+"#{i + 10}"
 
             # Configure Local Variable To Access Scripts From Remote Location
             scriptDir = File.dirname(__FILE__)
@@ -82,13 +89,13 @@ Vagrant.configure("2") do |config|
               SHELL
             end
 
+            config.push.define "local-exec" do |push|
+              push.script = "local/configure_pg_trust.sh"
+            end
+
             subconfig.vm.provision "shell" do |s|
                 s.name = "Installing vagrant bootstrap"
                 s.inline = "sudo " + localscriptDir + "/install.sh"
-            end
-
-            config.push.define "local-exec" do |push|
-              push.script = "local/configure_pg_trust.sh"
             end
 
             # Provider-specific configuration so you can fine-tune various
