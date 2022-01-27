@@ -266,7 +266,7 @@ function install_configure_postgres {
                 # converting this to a safe GB value for postgres
                 sed -i -r "s|#?effective_cache_size =".*"$|effective_cache_size = ${PGEFFECTIVE}MB|" ${PGCONF}
 
-                postgres_shared=`expr $shmmax / 1024 / 1024 / 1000`
+                    postgres_shared=`expr $shmmax / 1024 / 1024 / 1000`
 
                 echo "Postgres shared buffer size in GB: ${postgres_shared}"
                 echo "Configuring memory settings"
@@ -299,8 +299,9 @@ function install_configure_postgres {
 
         # install my .psqlrc file
         # cp /tmp/rcfiles/psqlrc /var/lib/postgresql/.psqlrc
+    fi
 
-    }
+}
 
 
 function configure_credentials {
