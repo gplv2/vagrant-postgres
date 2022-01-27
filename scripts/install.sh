@@ -327,6 +327,20 @@ function install_configure_postgres {
     sudo chown -R postgres:postgres ${PGHOME}/.ssh/authorized_keys
     sudo chmod 644 ${PGHOME}/.ssh/authorized_keys
     #sudo chmod 600 /var/lib/pgsql/.ssh/id_rsa
+
+    i=0
+    while read line
+    do
+        host_ips[ $i ]="$line"        
+        (( i++ ))
+    done < <(cat /vagrant/iplist.txt)
+
+    for ip in "${host_ips[@]}"
+    do
+        echo "Scanning host key: ${ip}"
+        sudo su -l postgres -c "ssh-keyscan -H ${ip} >> ~/.ssh/known_hosts"
+    done
+
 }
 
 

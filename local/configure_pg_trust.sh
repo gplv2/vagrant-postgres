@@ -1,8 +1,8 @@
 #!/usr/bin/env bash 
 
-set -o allexport
-source /vagrant/scripts/variables
-set +o allexport
+#set -o allexport
+#source ./scripts/variables
+#set +o allexport
 
 echo "Generating local keys"
 rm -Rf tmp/*

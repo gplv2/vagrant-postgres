@@ -6,16 +6,33 @@ BOX_IMAGE = "centos/7"
 NODE_COUNT = 2
 IP_PREFIX="192.168.88."
 
+# create ip list for the nodes to use
+def this(file)
+  i = 0
+  until i>=NODE_COUNT.to_int 
+    i+=1
+    ip=IP_PREFIX+"#{i + 10}"
+    # Normally 'puts' writes to the standard output stream (STDOUT)
+    # which appears on the terminal, but it can also write directly
+    # to a file ...
+    file.puts ip
+  end
+end
+
+filename = "iplist.txt"
+
+# Open file for writing
+File.open(filename, 'w') do |file|
+  # call the method, passing in the file object
+  this(file)
+  # file is automatically closed when block is done
+end
+
 Vagrant.configure("2") do |config|
     # The most common configuration options are documented and commented below.
     # For a complete reference, please see the online documentation at
     # https://docs.vagrantup.com.
     #  create ip list
-    (1..NODE_COUNT).each do |i|
-        config.push.define "local-exec" do |push|
-            push.script = "echo "+IP_PREFIX+"#{i + 10} >> iplist.txt"
-        end
-    end
 
     (1..NODE_COUNT).each do |i|
         config.vm.define "db#{i}" do |subconfig|
@@ -89,10 +106,6 @@ Vagrant.configure("2") do |config|
               SHELL
             end
 
-            config.push.define "local-exec" do |push|
-              push.script = "local/configure_pg_trust.sh"
-            end
-
             subconfig.vm.provision "shell" do |s|
                 s.name = "Installing vagrant bootstrap"
                 s.inline = "sudo " + localscriptDir + "/install.sh"
@@ -129,4 +142,16 @@ Vagrant.configure("2") do |config|
     #    config.vm.provision "shell", inline: <<-SHELL
     #  yum -y install avahi avahi-tools
     #    SHELL
+    config.push.define "local-exec" do |push|
+      push.inline = <<-SCRIPT
+            local/configure_pg_trust.sh
+      SCRIPT
+    end
+#    (1..NODE_COUNT).each do |i|
+#      config.push.define "local-exec" do |push|
+#        push.inline = <<-SCRIPT
+#            echo #{IP_PREFIX}"#{i + 10}" >> iplist.txt
+#        SCRIPT
+#      end
+#    end
 end
