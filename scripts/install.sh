@@ -414,6 +414,13 @@ function configure_credentials {
     fi
 }
 
+function config_sysctl {
+    if [ -r "/vagrant/ha/add_sysctl.conf" ]; then
+        cat /vagrant/ha/add_sysctl.conf >> /etc/sysctl.conf
+        sysctl -p
+    fi
+}
+
 echo "${GREEN}Start provisioning postgresql ${RESET}"
 
 #fix_locales
@@ -428,6 +435,7 @@ install_git_repos
 add_ssh_opts
 install_configure_postgres
 add_hosts
+config_sysctl
 #load_postgres_sqlfiles
 #create_bash_alias
 
