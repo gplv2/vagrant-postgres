@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 while getopts m: flag
 do
@@ -14,7 +14,7 @@ echo "Mode: $MODE";
 INSTANCE=vagrant
 SCRIPTS=/vagrant/keepalived/
 PORT=5432
-MY_CIDR=192.168.88.5/24
+MY_CIDR="192.168.88.5\/24"
 
 function isinstalled {
 	if yum list installed "$@" >/dev/null 2>&1; then
@@ -35,12 +35,12 @@ function install_configure_keepalived {
 
 	if [ "$MODE" = "master" ]; then
 		echo "Configuring keepalived config file"
-		cat ${SCRIPTS}/keepalived-template-master.conf | sed -e "s/MY_CIDR/${MY_CIDR}/"  -e "s/MY_MODE/MASTER/" > keepalived-master.conf
+		cat ${SCRIPTS}/keepalived-template-master.conf | sed -e "s/MY_MODE/MASTER/ ; s/MY_CIDR/${MY_CIDR}/" > keepalived-master.conf
 		cp ${SCRIPTS}/keepalived-master.conf /etc/keepalived/keepalived.conf
 	fi
 	if [ "$MODE" = "standby" ]; then
 		echo "Configuring keepalived config file"
-		cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_CIDR/${MY_CIDR}/"  -e "s/MY_MODE/STANDBY/" > keepalived-standby.conf
+		cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/STANDBY/ ; s/MY_CIDR/${MY_CIDR}/" > keepalived-standby.conf
 		cp ${SCRIPTS}/keepalived-standby.conf /etc/keepalived/keepalived.conf
 	fi
 	echo "Starting keepalived"
