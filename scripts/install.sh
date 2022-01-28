@@ -33,7 +33,13 @@ function isinstalled {
 
 function install_configure_packages {
     echo "${GREEN}Installing tools${RESET}"
-    sudo yum -y install nodejs haproxy keepalived pgbouncer git openssl curl wget net-tools
+    sudo yum -d1 -q -y install nodejs haproxy keepalived pgbouncer git openssl curl wget net-tools npm
+
+	# install hosts tool to intelligently modify /etc/hosts
+   	sudo npm config set loglevel warn
+   	sudo npm install --global hosts.sh | true
+   	sudo npm install --global sprintf-js | true
+   	sudo npm install --global parse-key-value | true
 
     # curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
     # curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -

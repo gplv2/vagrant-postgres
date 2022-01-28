@@ -120,7 +120,7 @@ Vagrant.configure("2") do |config|
             subconfig.trigger.after :up do
                 if(i == NODE_COUNT) then
                     info "Last machine is up, assume this is the master and lets configure repmgr from this node"
-                    run_remote  "/vagrant/repmgr.sh"
+                    run_remote  "/vagrant/repmgr/repmgr.sh"
                 end   
             end
 
