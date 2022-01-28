@@ -89,10 +89,10 @@ function create_pgpass {
     echo "${GREEN}Checking pgpass${RESET}"
     if [ ! -e "${PGPASS}" ]; then
         echo "create ${PGPASS}"
-        echo "localhost:5432:${DB}:${USER}:${PASSWORD}" > $PGPASS
-        echo "localhost:5432:${DATA_DB}:${USER}:${PASSWORD}" >> $PGPASS
-        echo "127.0.0.1:5432:${DB}:${USER}:${PASSWORD}" >> $PGPASS
-        echo "127.0.0.1:5432:${DATA_DB}:${USER}:${PASSWORD}" >> $PGPASS
+        echo "localhost:${PORT}:${DB}:${USER}:${PASSWORD}" > $PGPASS
+        echo "localhost:${PORT}:${DATA_DB}:${USER}:${PASSWORD}" >> $PGPASS
+        echo "127.0.0.1:${PORT}:${DB}:${USER}:${PASSWORD}" >> $PGPASS
+        echo "127.0.0.1:${PORT}:${DATA_DB}:${USER}:${PASSWORD}" >> $PGPASS
         PERMS=$(stat -c "%a" ${PGPASS})
         if [ ! "${PERMS}" = "0600" ]; then
             chmod 0600 ${PGPASS}
@@ -291,6 +291,7 @@ function install_configure_postgres {
                 echo "Postgres shared buffer size in GB: ${postgres_shared}"
                 echo "Configuring memory settings"
                 sed -i "s/shared_buffers = 128MB/shared_buffers = ${postgres_shared}GB/" ${PGCONF}
+                sed -i "s/port = 5432/port = ${PORT}/" ${PGCONF}
                 sed -i "s/#work_mem = 4MB/work_mem = 8MB/" ${PGCONF}
                 sed -i "s/#maintenance_work_mem = 64MB/maintenance_work_mem = 2048MB/" ${PGCONF}
                 sed -i "s/#max_files_per_process = 1000/max_files_per_process = 10000/" ${PGCONF}

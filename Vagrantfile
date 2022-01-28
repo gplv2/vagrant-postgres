@@ -139,7 +139,9 @@ Vagrant.configure("2") do |config|
                 s.inline = "sudo " + localscriptDir + "/install.sh"
             end
 
+            # keepalived setup
             subconfig.vm.provision "shell" do |s|
+              # make the last one the master for keepalived, it doesn't really matter for keepalived who is who
               if(i == NODE_COUNT) then
                 s.name = "configuring keepalived master node"
                 s.inline = "sudo  /vagrant/keepalived/keepalived.sh -m master"
@@ -149,12 +151,18 @@ Vagrant.configure("2") do |config|
               end
             end
 
-#            subconfig.trigger.after :up do
-#                if(i == NODE_COUNT) then
-#                    info "Last machine is up, assume this is the master and lets configure repmgr from this node"
-#                    run_remote  "/vagrant/repmgr/repmgr.sh"
-#                end   
-#            end
+            # repmgr setup
+            name="node"+"#{i}"
+            subconfig.vm.provision "shell" do |s|
+              # make nr 1 the master so the rest can clone from it
+              if(i == 1) then
+                s.name = "configuring repmgr master node"
+                s.inline = "sudo  /vagrant/repmgr/repmgr.sh -m master -n " + name + " -i " + "#{i}"
+              else
+                s.name = "configuring repmgr slave node"
+                s.inline = "sudo  /vagrant/repmgr/repmgr.sh -m standby -n " + name + " -i " + "#{i}"
+              end
+            end
 
             # Provider-specific configuration so you can fine-tune various
             # backing providers for Vagrant. These expose provider-specific options.

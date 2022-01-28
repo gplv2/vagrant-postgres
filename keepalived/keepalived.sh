@@ -13,7 +13,6 @@ echo "Mode: $MODE";
 
 INSTANCE=vagrant
 SCRIPTS=/vagrant/keepalived/
-PORT=5432
 MY_CIDR="192.168.88.5\/24"
 
 function isinstalled {
@@ -43,6 +42,8 @@ function install_configure_keepalived {
 		cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/BACKUP/ ; s/MY_CIDR/${MY_CIDR}/" > keepalived-standby.conf
 		cp ${SCRIPTS}/keepalived-standby.conf /etc/keepalived/keepalived.conf
 	fi
+	echo "Enable keepalived"
+    	sudo systemctl enable --now keepalived
 	echo "Starting keepalived"
 	service keepalived start
 }

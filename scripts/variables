@@ -17,6 +17,11 @@ PROJECT_NAME=testcluster
 PROJECT_DIRECTORY=/var/www/${PROJECT_NAME}
 DEPLOY_USER=vagrant
 
+# postgres
+PORT=6432
+PORT_BOUNCER=7432
+PORT_HAPROXY=5432
+
 # Screen colors using tput
 
 RED=`tput setaf 1`
