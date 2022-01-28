@@ -291,7 +291,7 @@ function install_configure_postgres {
                 echo "Postgres shared buffer size in GB: ${postgres_shared}"
                 echo "Configuring memory settings"
                 sed -i "s/shared_buffers = 128MB/shared_buffers = ${postgres_shared}GB/" ${PGCONF}
-                sed -i "s/port = 5432/port = ${PORT}/" ${PGCONF}
+                sed -i "s/#port = 5432/port = ${PORT}/" ${PGCONF}
                 sed -i "s/#work_mem = 4MB/work_mem = 8MB/" ${PGCONF}
                 sed -i "s/#maintenance_work_mem = 64MB/maintenance_work_mem = 2048MB/" ${PGCONF}
                 sed -i "s/#max_files_per_process = 1000/max_files_per_process = 10000/" ${PGCONF}
@@ -309,6 +309,10 @@ function install_configure_postgres {
             echo "${GREEN}Restarting Postgresql 11 ${RESET}"
             systemctl restart postgresql-11
         fi
+	
+	# set the port up in the profile , important when not using standard port
+	sudo su -l postgres -c "echo \"PGPORT=${PORT}\" >> .bash_profile"
+	sudo su -l postgres -c "echo \"export PGPORT\" >> .bash_profile"
 
         # set permissions
         if [ -e "${PGHBA}" ]; then
