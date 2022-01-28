@@ -357,17 +357,17 @@ function add_ssh_opts {
             if [ ! -e "${SSH_CONFIG}" ]; then
                 cp /vagrant/ssh_config ${SSH_CONFIG} 
                 chown postgres:postgres ${SSH_CONFIG}
-				chmod 600 ${SSH_CONFIG}
+                chmod 600 ${SSH_CONFIG}
             fi
         fi
     fi
 }
 
 function add_hosts {
-	if [ -r "/vagrant/addhosts.sh" ]; then
-		chmod +x /vagrant/addhosts.sh
-		/vagrant/addhosts.sh
-	fi
+    if [ -r "/vagrant/addhosts.sh" ]; then
+        chmod +x /vagrant/addhosts.sh
+        /vagrant/addhosts.sh
+    fi
 }
 
 function configure_credentials {
@@ -423,8 +423,8 @@ install_git_repos
 #configure_credentials
 #create_pgpass
 add_ssh_opts
-add_hosts
 install_configure_postgres
+add_hosts
 #load_postgres_sqlfiles
 #create_bash_alias
 
