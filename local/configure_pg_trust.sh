@@ -7,8 +7,5 @@
 echo "Generating local keys"
 rm -Rf tmp/*
 
-ssh-keygen -t rsa -q -f "tmp/id_rsa" -N ""
-
-#sudo su -l postgres -c 'ssh-keyscan -H ${IP1} >> ~/.ssh/known_hosts'
-#sudo su -l postgres -c 'ssh-keyscan -H ${IP2} >> ~/.ssh/known_hosts'
+ssh-keygen -t rsa-sha2-512 -q -f "tmp/id_rsa" -N ""
 

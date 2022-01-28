@@ -1,8 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-#BOX_IMAGE = "bento/centos-7"
-BOX_IMAGE = "centos/7"
+BOX_IMAGE = "bento/centos-7"
+#BOX_IMAGE = "centos/7"
 NODE_COUNT = 2
 IP_PREFIX="192.168.88."
 
@@ -27,6 +27,10 @@ File.open(filename, 'w') do |file|
   this(file)
   # file is automatically closed when block is done
 end
+
+# create local keys to push
+#cmd="local/configure_pg_trust.sh"
+#system(cmd)
 
 Vagrant.configure("2") do |config|
     # The most common configuration options are documented and commented below.
@@ -147,11 +151,4 @@ Vagrant.configure("2") do |config|
             local/configure_pg_trust.sh
       SCRIPT
     end
-#    (1..NODE_COUNT).each do |i|
-#      config.push.define "local-exec" do |push|
-#        push.inline = <<-SCRIPT
-#            echo #{IP_PREFIX}"#{i + 10}" >> iplist.txt
-#        SCRIPT
-#      end
-#    end
 end

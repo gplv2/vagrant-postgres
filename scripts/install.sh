@@ -338,7 +338,7 @@ function install_configure_postgres {
     for ip in "${host_ips[@]}"
     do
         echo "Scanning host key: ${ip}"
-        sudo su -l postgres -c "ssh-keyscan -H ${ip} >> ~/.ssh/known_hosts"
+        sudo su -l postgres -c "ssh-keyscan ${ip} >> ~/.ssh/known_hosts"
     done
 
 }
