@@ -153,14 +153,15 @@ Vagrant.configure("2") do |config|
 
             # repmgr setup
             name="node"+"#{i}"
+            number="#{i}"
             subconfig.vm.provision "shell" do |s|
               # make nr 1 the master so the rest can clone from it
               if(i == 1) then
                 s.name = "configuring repmgr master node"
-                s.inline = "sudo  /vagrant/repmgr/repmgr.sh -m master -n " + name + " -i " + "#{i}"
+                s.inline = "sudo  /vagrant/repmgr/repmgr.sh -m master -n " + name + " -i " + number
               else
                 s.name = "configuring repmgr slave node"
-                s.inline = "sudo  /vagrant/repmgr/repmgr.sh -m standby -n " + name + " -i " + "#{i}"
+                s.inline = "sudo  /vagrant/repmgr/repmgr.sh -m standby -n " + name + " -i " + number
               end
             end
 
