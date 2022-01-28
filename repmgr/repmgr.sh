@@ -33,7 +33,7 @@ echo "Mode: $MODE";
 INSTANCE=vagrant
 SCRIPTS=/vagrant/repmgr/
 
-REPMGR="repmgr -f /etc/repmgr/11/repmgr-${INSTANCE}.conf"
+REPMGR="repmgr -f /etc/repmgr/11/repmgr.conf"
 alias repmgr=$REPMGR
 
 echo "Preparing cluster for repmgr installation"
