@@ -232,8 +232,8 @@ function install_configure_postgres {
     #sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
     echo "Disable stock postgresql..."
-    sudo yum-config-manager  --save --setopt=base.exclude=postgres*; 1> /dev/null 2>&1
-    sudo yum-config-manager  --save --setopt=updates.exclude=postgres*; 1> /dev/null 2>&1
+    sudo yum-config-manager  --save --setopt=base.exclude=postgres* 1> /dev/null 2>&1
+    sudo yum-config-manager  --save --setopt=updates.exclude=postgres* 1> /dev/null 2>&1
 
     echo "Install PG 11 packages ..."
     sudo yum-config-manager --enable pgdg11 1> /dev/null 2>&1
