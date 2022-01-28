@@ -28,10 +28,6 @@ File.open(filename, 'w') do |file|
   # file is automatically closed when block is done
 end
 
-# create local keys to push
-#cmd="local/configure_pg_trust.sh"
-#system(cmd)
-
 Vagrant.configure("2") do |config|
     # The most common configuration options are documented and commented below.
     # For a complete reference, please see the online documentation at
@@ -121,6 +117,13 @@ Vagrant.configure("2") do |config|
                 s.inline = "sudo " + localscriptDir + "/install.sh"
             end
 
+            subconfig.trigger.after :up do
+                if(i == NODE_COUNT) then
+                    info "Last machine is up, assume this is the master and lets configure repmgr from this node"
+                    run_remote  "/vagrant/repmgr.sh"
+                end   
+            end
+
             # Provider-specific configuration so you can fine-tune various
             # backing providers for Vagrant. These expose provider-specific options.
             # Example for VirtualBox:
@@ -156,7 +159,7 @@ Vagrant.configure("2") do |config|
     #    SHELL
     config.push.define "local-exec" do |push|
       push.inline = <<-SCRIPT
-            local/configure_pg_trust.sh
+            local/generate_postgres_keypairs.sh
       SCRIPT
     end
 end
