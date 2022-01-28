@@ -309,6 +309,7 @@ function install_configure_postgres {
             echo "${GREEN}Restarting Postgresql 11 ${RESET}"
             systemctl restart postgresql-11
         fi
+        #sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" ${PGCONF}
 	
 	# set the port up in the profile , important when not using standard port
 	sudo su -l postgres -c "echo \"PGPORT=${PORT}\" >> .bash_profile"
@@ -317,7 +318,6 @@ function install_configure_postgres {
         # set permissions
         if [ -e "${PGHBA}" ]; then
             #echo "host    all             all             $SUBNET           trust" >> /etc/postgresql/10/main/pg_hba.conf
-            #sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" ${PGCONF}
             sed -i "s/host    all             all             127.0.0.1\/32            md5/#host    all             all             127.0.0.1\/32            md5/" ${PGHBA}
             echo "host    all             all             127.0.0.1/32           trust" >> ${PGHBA}
         fi
