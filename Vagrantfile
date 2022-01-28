@@ -140,8 +140,13 @@ Vagrant.configure("2") do |config|
             end
 
             subconfig.vm.provision "shell" do |s|
-                s.name = "configuring keepalived"
-                s.inline = "sudo " + localscriptDir + "/keepalived/keepalived.sh"
+              if(i == NODE_COUNT) then
+                s.name = "configuring keepalived master node"
+                s.inline = "sudo " + localscriptDir + "/keepalived/keepalived.sh -m master"
+              else
+                s.name = "configuring keepalived standby node"
+                s.inline = "sudo " + localscriptDir + "/keepalived/keepalived.sh -m standby"
+              end
             end
 
 #            subconfig.trigger.after :up do
