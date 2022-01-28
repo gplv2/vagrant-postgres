@@ -37,6 +37,13 @@ Vagrant.configure("2") do |config|
     # For a complete reference, please see the online documentation at
     # https://docs.vagrantup.com.
     #  create ip list
+    # Configure Local Variable To Access Scripts From Remote Location
+    
+    config.trigger.after :up do |trigger|
+      trigger.name = "Register keys"
+      trigger.info = "Accepting hosts keys for all machine"
+      trigger.run_remote = { inline: "/vagrant/scripts/keys.sh" }
+    end
 
     (1..NODE_COUNT).each do |i|
         config.vm.define "db#{i}" do |subconfig|
@@ -48,7 +55,6 @@ Vagrant.configure("2") do |config|
             #subconfig.vm.network "private_network", ip: "192.168.50.5"
             subconfig.vm.network :private_network, ip: IP_PREFIX+"#{i + 10}"
 
-            # Configure Local Variable To Access Scripts From Remote Location
             scriptDir = File.dirname(__FILE__)
             localscriptDir = "/vagrant/scripts"
             dbUser = "postgres"
@@ -140,10 +146,8 @@ Vagrant.configure("2") do |config|
             #
         end
     end
-    config.trigger.after :up do |trigger|
-      trigger.info = "Accepting hosts keys for all machine"
-      trigger.run_remote = "sudo " + localscriptDir + "/keys.sh"
-    end
+    #
+    #
     # for mDNS
     # disabling this crashes virtualbox with a fat error when you try to ping using db1.local of db2.local
     #  HOSTRES[420474]: segfault at 7fa827926888 ip 00007fa8201c9685 sp 00007fa827926888 error 6 in libnss_mdns4_minimal.so.2[7fa8201c9000+2000]
