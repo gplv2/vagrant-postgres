@@ -33,7 +33,7 @@ function isinstalled {
 
 function install_configure_packages {
     echo "${GREEN}Installing tools${RESET}"
-    sudo yum -d1 -q -y install haproxy keepalived pgbouncer git openssl curl wget net-tools
+    sudo yum -d1 -q -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
     
     echo "${GREEN}Installing NPM${RESET}"
     sudo curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -

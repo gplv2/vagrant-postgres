@@ -40,7 +40,7 @@ function install_configure_keepalived {
 	fi
 	if [ "$MODE" = "standby" ]; then
 		echo "Configuring keepalived config file"
-		cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/STANDBY/ ; s/MY_CIDR/${MY_CIDR}/" > keepalived-standby.conf
+		cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/BACKUP/ ; s/MY_CIDR/${MY_CIDR}/" > keepalived-standby.conf
 		cp ${SCRIPTS}/keepalived-standby.conf /etc/keepalived/keepalived.conf
 	fi
 	echo "Starting keepalived"
