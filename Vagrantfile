@@ -25,11 +25,11 @@ def hosts(file)
   until i>=NODE_COUNT.to_int 
     i+=1
     ip=IP_PREFIX+"#{i + 10}"
-    name="db"+IP_PREFIX+"#{i + 10}"
+    name="db"+"#{i}"
     # Normally 'puts' writes to the standard output stream (STDOUT)
     # which appears on the terminal, but it can also write directly
     # to a file ...
-    file.puts "hosts --auto-sudo add ip name"
+    file.puts 'hosts --auto-sudo add ' + ip + ' ' + name
   end
 end
 
@@ -144,12 +144,12 @@ Vagrant.configure("2") do |config|
                 s.inline = "sudo " + localscriptDir + "/keepalived/keepalived.sh"
             end
 
-            subconfig.trigger.after :up do
-                if(i == NODE_COUNT) then
-                    info "Last machine is up, assume this is the master and lets configure repmgr from this node"
-                    run_remote  "/vagrant/repmgr/repmgr.sh"
-                end   
-            end
+#            subconfig.trigger.after :up do
+#                if(i == NODE_COUNT) then
+#                    info "Last machine is up, assume this is the master and lets configure repmgr from this node"
+#                    run_remote  "/vagrant/repmgr/repmgr.sh"
+#                end   
+#            end
 
             # Provider-specific configuration so you can fine-tune various
             # backing providers for Vagrant. These expose provider-specific options.
