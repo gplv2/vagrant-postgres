@@ -139,6 +139,11 @@ Vagrant.configure("2") do |config|
                 s.inline = "sudo " + localscriptDir + "/install.sh"
             end
 
+            subconfig.vm.provision "shell" do |s|
+                s.name = "configuring keepalived"
+                s.inline = "sudo " + localscriptDir + "/keepalived/keepalived.sh"
+            end
+
             subconfig.trigger.after :up do
                 if(i == NODE_COUNT) then
                     info "Last machine is up, assume this is the master and lets configure repmgr from this node"
