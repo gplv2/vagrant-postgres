@@ -25,7 +25,7 @@ def hosts(file)
   until i>=NODE_COUNT.to_int 
     i+=1
     ip=IP_PREFIX+"#{i + 10}"
-    name="db"+"#{i}"
+    name="node"+"#{i}"
     # Normally 'puts' writes to the standard output stream (STDOUT)
     # which appears on the terminal, but it can also write directly
     # to a file ...

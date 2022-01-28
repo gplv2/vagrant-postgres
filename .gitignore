@@ -2,3 +2,5 @@
 tmp/*
 iplist.txt
 addhosts.sh
+keepalived-standby.conf
+keepalived-master.conf
