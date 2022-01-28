@@ -33,16 +33,19 @@ function isinstalled {
 
 function install_configure_packages {
     echo "${GREEN}Installing tools${RESET}"
-    sudo yum -d1 -q -y install nodejs haproxy keepalived pgbouncer git openssl curl wget net-tools npm
+    sudo yum -d1 -q -y install haproxy keepalived pgbouncer git openssl curl wget net-tools
+    
+    echo "${GREEN}Installing NPM${RESET}"
+    sudo curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
 
-	# install hosts tool to intelligently modify /etc/hosts
-	sudo npm config set loglevel warn
-	sudo npm install --global hosts.sh | true
-	sudo npm install --global sprintf-js | true
-	sudo npm install --global parse-key-value | true
+    sudo yum -d1 -q -y install nodejs 
 
-    # curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-    # curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+    echo "${GREEN}Installing npm hosts tool${RESET}"
+    # install hosts tool to intelligently modify /etc/hosts
+    sudo npm config set loglevel warn
+    sudo npm install --global hosts.sh | true
+    sudo npm install --global sprintf-js | true
+    sudo npm install --global parse-key-value | true
 
     # get our IP address
     MY_IP=`ifconfig  | grep -E -o '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'`
