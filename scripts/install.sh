@@ -378,6 +378,15 @@ function add_hosts {
     fi
 }
 
+function add_psql_profile {
+    PSQL="/vagrant/scripts/psql.sh"
+    if [ -r "${PSQL}" ]; then
+        cp ${PSQL} /etc/profile.d/
+        chown root:root  ${PSQL}
+        chmod +x ${PSQL}
+    fi
+}
+
 function configure_credentials {
     ## Fix DEPLOY_USER ssh Permissions
     if [ ! -d "/home/${DEPLOY_USER}/.ssh" ]; then
@@ -436,9 +445,10 @@ install_configure_packages
 install_git_repos
 #make_work_dirs
 #configure_credentials
-#create_pgpass
 add_ssh_opts
 install_configure_postgres
+create_pgpass
+add_psql_profile
 add_hosts
 config_sysctl
 #load_postgres_sqlfiles
