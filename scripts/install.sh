@@ -370,7 +370,6 @@ function add_hosts {
 	fi
 }
 
-
 function configure_credentials {
     ## Fix DEPLOY_USER ssh Permissions
     if [ ! -d "/home/${DEPLOY_USER}/.ssh" ]; then
