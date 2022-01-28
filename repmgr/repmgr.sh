@@ -57,11 +57,12 @@ function install_configure_repmgr {
 			echo "Configuring repmgr master DB server ..."
 
 			echo "Preparing Database ... "
+
 			# install extension
 			cat > /tmp/install.repmgr.sql << EOF
 CREATE EXTENSION repmgr;
 CREATE USER repmgr;
-ALTER USER repmgr WITH SUPERUSER;
+ALTER USER repmgr WITH SUPERUSER PASSWORD '${REPMGR_PASSWORD}';
 CREATE DATABASE repmgr WITH OWNER repmgr;
 EOF
 			echo "Creating extension and repmgr user"

@@ -86,19 +86,19 @@ function create_pgpass {
     PGHOME=`getent passwd postgres | awk -F: '{ print $6 }'`
     PGPASS=${PGHOME}/.pgpass
 
-    echo "${GREEN}Checking pgpass${RESET}"
     if [ ! -e "${PGPASS}" ]; then
-        echo "create ${PGPASS}"
-        echo "localhost:${PORT}:${DB}:${USER}:${PASSWORD}" > $PGPASS
-        echo "localhost:${PORT}:${DATA_DB}:${USER}:${PASSWORD}" >> $PGPASS
-        echo "127.0.0.1:${PORT}:${DB}:${USER}:${PASSWORD}" >> $PGPASS
-        echo "127.0.0.1:${PORT}:${DATA_DB}:${USER}:${PASSWORD}" >> $PGPASS
-        PERMS=$(stat -c "%a" ${PGPASS})
-        if [ ! "${PERMS}" = "0600" ]; then
-            chmod 0600 ${PGPASS}
+        echo "${GREEN}Checking pgpass${RESET}"
+        if [ -z "$DB" ] ; then
+            DB="*"
+        fi
+        echo "Creating ${PGPASS}"
+        echo "*:${PORT}:${DB}:repmgr:${REPMGR_PASSWORD}" > $PGPASS
+        echo "*:${PORT}:${DB}:repmgr:${REPMGR_PASSWORD}" >> $PGPASS
+        if ! [ -z "$USER" ] ; then
+            echo "localhost:${PORT}:${DATA_DB}:${USER}:${PASSWORD}" >> $PGPASS
+            echo "127.0.0.1:${PORT}:${DATA_DB}:${USER}:${PASSWORD}" >> $PGPASS
         fi
 
-        #chown -R ${DEPLOY_USER}:${DEPLOY_USER} $PGPASS $PGRC
         chown -R postgres:postgres $PGPASS  # $PGRC
         PERMS=$(stat -c "%a" ${PGPASS})
         if [ ! "${PERMS}" = "0600" ]; then

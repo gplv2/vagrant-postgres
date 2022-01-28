@@ -22,8 +22,13 @@ PORT=6432
 PORT_BOUNCER=7432
 PORT_HAPROXY=5432
 
+PG_HBA_NET="192.168.88.0\/24"  # escaped notation
+
 # network range for keepalived (use escaped since we use sed to create templates
 MY_CIDR_IP="192.168.88.5\/24"
+
+# repmgr
+REPMGR_PASSWORD="ThaReplicator"
 
 # Screen colors using tput
 
