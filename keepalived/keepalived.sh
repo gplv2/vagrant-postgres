@@ -35,12 +35,12 @@ function install_configure_keepalived {
 
 	if [ "$MODE" = "master" ]; then
 		echo "Configuring keepalived config file"
-		cat ${SCRIPTS}/keepalived-master.conf | sed -e "s/MY_CIDR/${MY_CIDR}/"  -e "s/MY_MODE/MASTER/"
+		cat ${SCRIPTS}/keepalived-template-master.conf | sed -e "s/MY_CIDR/${MY_CIDR}/"  -e "s/MY_MODE/MASTER/" > keepalived-master.conf
 		cp ${SCRIPTS}/keepalived-master.conf /etc/keepalived/keepalived.conf
 	fi
 	if [ "$MODE" = "standby" ]; then
 		echo "Configuring keepalived config file"
-		cat ${SCRIPTS}/keepalived-standby.conf | sed -e "s/MY_CIDR/${MY_CIDR}/"  -e "s/MY_MODE/STANDBY/"
+		cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_CIDR/${MY_CIDR}/"  -e "s/MY_MODE/STANDBY/" > keepalived-standby.conf
 		cp ${SCRIPTS}/keepalived-standby.conf /etc/keepalived/keepalived.conf
 	fi
 	echo "Starting keepalived"
