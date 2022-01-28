@@ -39,11 +39,11 @@ Vagrant.configure("2") do |config|
     #  create ip list
     # Configure Local Variable To Access Scripts From Remote Location
     
-    config.trigger.after :up do |trigger|
-      trigger.name = "Register keys"
-      trigger.info = "Accepting hosts keys for all machine"
-      trigger.run_remote = { inline: "/vagrant/scripts/keys.sh" }
-    end
+#    config.trigger.after :up do |trigger|
+#      trigger.name = "Register keys"
+#      trigger.info = "Accepting hosts keys for all machine"
+#      trigger.run_remote = { inline: "/vagrant/scripts/keys.sh" }
+#    end
 
     (1..NODE_COUNT).each do |i|
         config.vm.define "db#{i}" do |subconfig|

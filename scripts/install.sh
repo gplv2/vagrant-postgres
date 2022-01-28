@@ -343,6 +343,19 @@ function install_configure_postgres {
 
 }
 
+function add_ssh_opts {
+    PGHOME=`getent passwd postgres | awk -F: '{ print $6 }'`
+    SSH_CONFIG=${PGHOME}/.ssh/config
+    if [ -d "${PGHOME}/.ssh" ]; then
+        if [ -r "/vagrant/ssh_config" ]; then
+            if [ ! -e "${SSH_CONFIG}" ]; then
+                cp /vagrant/ssh_config ${SSH_CONFIG} 
+                chown postgres:postgres ${SSH_CONFIG}
+            	chmod 600 ${SSH_CONFIG}
+            fi
+        fi
+    fi
+}
 
 function configure_credentials {
     ## Fix DEPLOY_USER ssh Permissions
@@ -396,6 +409,7 @@ install_git_repos
 #make_work_dirs
 #configure_credentials
 #create_pgpass
+add_ssh_opts
 install_configure_postgres
 #load_postgres_sqlfiles
 #create_bash_alias
