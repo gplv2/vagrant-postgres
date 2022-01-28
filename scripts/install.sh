@@ -435,6 +435,13 @@ function config_sysctl {
     fi
 }
 
+function make_pg_sudoers {
+    if [ -r "/vagrant/scripts/postgres" ]; then
+        cp /vagrant/scripts/postgres /etc/sudoers.d/
+	chmod 440 /etc/sudoers.d/postgres
+    fi
+}
+
 echo "${GREEN}Start provisioning postgresql ${RESET}"
 
 #fix_locales
@@ -449,6 +456,7 @@ add_ssh_opts
 install_configure_postgres
 create_pgpass
 add_psql_profile
+make_pg_sudoers
 add_hosts
 config_sysctl
 #load_postgres_sqlfiles
