@@ -36,10 +36,10 @@ function install_configure_packages {
     sudo yum -d1 -q -y install nodejs haproxy keepalived pgbouncer git openssl curl wget net-tools npm
 
 	# install hosts tool to intelligently modify /etc/hosts
-   	sudo npm config set loglevel warn
-   	sudo npm install --global hosts.sh | true
-   	sudo npm install --global sprintf-js | true
-   	sudo npm install --global parse-key-value | true
+	sudo npm config set loglevel warn
+	sudo npm install --global hosts.sh | true
+	sudo npm install --global sprintf-js | true
+	sudo npm install --global parse-key-value | true
 
     # curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
     # curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
@@ -357,11 +357,19 @@ function add_ssh_opts {
             if [ ! -e "${SSH_CONFIG}" ]; then
                 cp /vagrant/ssh_config ${SSH_CONFIG} 
                 chown postgres:postgres ${SSH_CONFIG}
-            	chmod 600 ${SSH_CONFIG}
+				chmod 600 ${SSH_CONFIG}
             fi
         fi
     fi
 }
+
+function add_hosts {
+	if [ -r "/vagrant/addhosts.sh" ]; then
+		chmod +x /vagrant/addhosts.sh
+		/vagrant/addhosts.sh
+	fi
+}
+
 
 function configure_credentials {
     ## Fix DEPLOY_USER ssh Permissions
@@ -416,6 +424,7 @@ install_git_repos
 #configure_credentials
 #create_pgpass
 add_ssh_opts
+add_hosts
 install_configure_postgres
 #load_postgres_sqlfiles
 #create_bash_alias

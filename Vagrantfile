@@ -19,12 +19,34 @@ def this(file)
   end
 end
 
+# create ip list for the nodes to use
+def hosts(file)
+  i = 0
+  until i>=NODE_COUNT.to_int 
+    i+=1
+    ip=IP_PREFIX+"#{i + 10}"
+    name="db"+IP_PREFIX+"#{i + 10}"
+    # Normally 'puts' writes to the standard output stream (STDOUT)
+    # which appears on the terminal, but it can also write directly
+    # to a file ...
+    file.puts "hosts --auto-sudo add ip name"
+  end
+end
+
 filename = "iplist.txt"
+addhosts = "addhosts.sh"
 
 # Open file for writing
 File.open(filename, 'w') do |file|
   # call the method, passing in the file object
   this(file)
+  # file is automatically closed when block is done
+end
+
+# Open file for writing
+File.open(addhosts, 'w') do |file|
+  # call the method, passing in the file object
+  hosts(file)
   # file is automatically closed when block is done
 end
 
