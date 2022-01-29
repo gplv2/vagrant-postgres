@@ -143,11 +143,11 @@ Vagrant.configure("2") do |config|
             subconfig.vm.provision "shell" do |s|
               # make the last one the master for keepalived, it doesn't really matter for keepalived who is who
               if(i == NODE_COUNT) then
-                s.name = "configuring keepalived master node"
-                s.inline = "sudo  /vagrant/keepalived/keepalived.sh -m master"
+                s.name = "Configuring keepalived master node"
+                s.inline = "sudo /vagrant/keepalived/keepalived.sh -m master"
               else
-                s.name = "configuring keepalived standby node"
-                s.inline = "sudo  /vagrant/keepalived/keepalived.sh -m standby"
+                s.name = "Configuring keepalived standby node"
+                s.inline = "sudo /vagrant/keepalived/keepalived.sh -m standby"
               end
             end
 
@@ -158,10 +158,10 @@ Vagrant.configure("2") do |config|
               # make nr 1 the master so the rest can clone from it
               if(i == 1) then
                 s.name = "configuring repmgr master node"
-                s.inline = "sudo  /vagrant/repmgr/repmgr.sh -m master -n " + name + " -i " + number
+                s.inline = "sudo /vagrant/repmgr/repmgr.sh -m master -n " + name + " -i " + number
               else
                 s.name = "configuring repmgr slave node"
-                s.inline = "sudo  /vagrant/repmgr/repmgr.sh -m standby -n " + name + " -i " + number
+                s.inline = "sudo /vagrant/repmgr/repmgr.sh -m standby -n " + name + " -i " + number
               end
             end
 

@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 set -o allexport
 source /vagrant/scripts/variables
@@ -6,9 +6,9 @@ set +o allexport
 
 while getopts m: flag
 do
-	case "${flag}" in
-		m) MODE=${OPTARG};;
-	esac
+    case "${flag}" in
+        m) MODE=${OPTARG};;
+    esac
 done
 
 echo "Mode: $MODE";
@@ -19,42 +19,42 @@ INSTANCE=vagrant
 SCRIPTS=/vagrant/keepalived/
 
 function isinstalled {
-	if yum list installed "$@" >/dev/null 2>&1; then
-		true
-	else
-		false
-	fi
+    if yum list installed "$@" >/dev/null 2>&1; then
+        true
+    else
+        false
+    fi
 }
 
 echo "Preparing cluster for keepalived installation"
 
 function install_configure_keepalived {
-	# DB server
-	echo "Configuring keepalived ..."
-	echo "Stopping keepalived if running"
-	service keepalived stop
-	cp /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.orig
+    # DB server
+    echo "Configuring keepalived ..."
+    echo "Stopping keepalived if running"
+    service keepalived stop
+    cp /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.orig
 
-	if [ "$MODE" = "master" ]; then
-		echo "Configuring keepalived config file"
-		cat ${SCRIPTS}/keepalived-template-master.conf | sed -e "s/MY_MODE/MASTER/ ; s/MY_CIDR/${MY_CIDR_IP}/" > keepalived-master.conf
-		cp ${SCRIPTS}/keepalived-master.conf /etc/keepalived/keepalived.conf
-	fi
-	if [ "$MODE" = "standby" ]; then
-		echo "Configuring keepalived config file"
-		cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/BACKUP/ ; s/MY_CIDR/${MY_CIDR_IP}/" > keepalived-standby.conf
-		cp ${SCRIPTS}/keepalived-standby.conf /etc/keepalived/keepalived.conf
-	fi
-	echo "Enable keepalived"
-    	sudo systemctl enable --now keepalived
-	echo "Starting keepalived"
-	service keepalived start
+    if [ "$MODE" = "master" ]; then
+        echo "Configuring keepalived config file"
+        cat ${SCRIPTS}/keepalived-template-master.conf | sed -e "s/MY_MODE/MASTER/ ; s/MY_CIDR/${MY_CIDR_IP}/" > keepalived-master.conf
+        cp ${SCRIPTS}/keepalived-master.conf /etc/keepalived/keepalived.conf
+    fi
+    if [ "$MODE" = "standby" ]; then
+        echo "Configuring keepalived config file"
+        cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/BACKUP/ ; s/MY_CIDR/${MY_CIDR_IP}/" > keepalived-standby.conf
+        cp ${SCRIPTS}/keepalived-standby.conf /etc/keepalived/keepalived.conf
+    fi
+    echo "Enable keepalived"
+        sudo systemctl enable --now keepalived
+    echo "Starting keepalived"
+    service keepalived start
 }
 
 function enable_keepalived {
-	if isinstalled keepalived ; then
-		systemctl enable keepalived
-	fi
+    if isinstalled keepalived ; then
+        systemctl enable keepalived
+    fi
 }
 
 echo "Start keepalived install tasks..."
