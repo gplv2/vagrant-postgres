@@ -30,9 +30,3 @@ MY_CIDR_IP="192.168.88.5\/24"
 # repmgr
 REPMGR_PASSWORD="ThaReplicator"
 
-# Screen colors using tput
-
-RED=`tput setaf 1`
-GREEN=`tput setaf 2`
-RESET=`tput sgr0`
-

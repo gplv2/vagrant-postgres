@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 set -o allexport
 source /vagrant/scripts/variables

@@ -4,6 +4,11 @@ set -o allexport
 source /vagrant/scripts/variables
 set +o allexport
 
+# Screen colors using tput
+RED=`tput setaf 1`
+GREEN=`tput setaf 2`
+RESET=`tput sgr0` 
+
 # RESOURCE_INDEX= grb-db-0
 if [ -z "$RESOURCE_INDEX" ] ; then
     RESOURCE_INDEX=`hostname`
@@ -425,6 +430,7 @@ function config_sysctl {
 }
 
 function config_haproxy_generator {
+    echo "${GREEN}Generate haproxy file${RESET}"
     PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
     if [ -r "/home/vagrant/haproxy-postgresql/create_haproxy_check.py" ]; then
         if [ -e "${PGHBA}" ]; then
