@@ -433,7 +433,9 @@ function config_haproxy_generator {
     echo "${GREEN}Generate haproxy file${RESET}"
     PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
     if [ -r "/home/vagrant/haproxy-postgresql/create_haproxy_check.py" ]; then
+    	echo "${GREEN}Found haproxy generator${RESET}"
         if [ -e "${PGHBA}" ]; then
+    	    echo "${GREEN}Found pg_hba file${RESET}"
             cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME} >> ${PGHBA}
 
             echo "${GREEN}Reloading Postgresql 11 ${RESET}"
@@ -449,6 +451,8 @@ function configure_haproxy {
     mkdir /etc/haproxy/certs.d
     echo "Create dhparam file..."
     sudo openssl dhparam -dsaparam -out /etc/haproxy/dhparam.pem 4096
+    echo "Creating conpig.py ..."
+    /vagrant/scripts/create_haconfig_ini.sh
     echo "Reconfiguring haproxy ..."
     cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg_orig
     cp /home/vagrant/haproxy-postgresql/configs/${PROJECT_NAME}/haproxy-${PROJECT_NAME}.cnf /etc/haproxy/haproxy.cfg
