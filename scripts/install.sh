@@ -435,6 +435,12 @@ function config_sysctl {
     fi
 }
 
+function config_haproxy_generator {
+    if [ -r "/home/vagrant/haproxy-postgresql/create_haproxy_check.py" ]; then
+        cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME}
+    fi
+}
+
 function make_pg_sudoers {
     if [ -r "/vagrant/scripts/postgres" ]; then
         cp /vagrant/scripts/postgres /etc/sudoers.d/
@@ -459,6 +465,7 @@ add_psql_profile
 make_pg_sudoers
 add_hosts
 config_sysctl
+config_haproxy_generator
 #load_postgres_sqlfiles
 #create_bash_alias
 
