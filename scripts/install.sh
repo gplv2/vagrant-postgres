@@ -62,6 +62,7 @@ function install_configure_packages {
 }
 
 function load_postgres_sqlfiles {
+    echo "${GREEN}load sql files${RESET}"
     # create alter list
     su - postgres -c "psql -qAtX -d ${DATA_DB} -c \"${MOVESQL}\" > /tmp/alter.pre.ts1.sql 2>/dev/null"
 
@@ -76,6 +77,7 @@ function load_postgres_sqlfiles {
 }
 
 function create_pgpass {
+    echo "${GREEN}Create pgpass${RESET}"
     # detect the home of postgres user
     PGHOME=`getent passwd postgres | awk -F: '{ print $6 }'`
     PGPASS=${PGHOME}/.pgpass
@@ -102,6 +104,7 @@ function create_pgpass {
 }
 
 function create_pgrc {
+   echo "${GREEN}Create .pgrc${RESET}"
    # # install my own psqlrc
    # echo "${GREEN}Creating .pgsqlrc${RESET}"
    # cp /tmp/rcfiles/psqlrc $PGRC
@@ -354,20 +357,20 @@ function install_configure_postgres {
 }
 
 function add_ssh_opts {
+    echo "${GREEN}Create SSH config for user postgres${RESET}"
     PGHOME=`getent passwd postgres | awk -F: '{ print $6 }'`
     SSH_CONFIG=${PGHOME}/.ssh/config
     if [ -d "${PGHOME}/.ssh" ]; then
-        if [ -r "/vagrant/ssh_config" ]; then
-            if [ ! -e "${SSH_CONFIG}" ]; then
-                cp /vagrant/scripts/ssh_config ${SSH_CONFIG} 
-                chown postgres:postgres ${SSH_CONFIG}
-                chmod 600 ${SSH_CONFIG}
-            fi
+        if [ -f "/vagrant/scripts/ssh_config" ]; then
+            sudo cp /vagrant/scripts/ssh_config ${SSH_CONFIG} 
+            sudo chown postgres:postgres ${SSH_CONFIG}
+            chmod 600 ${SSH_CONFIG}
         fi
     fi
 }
 
 function add_hosts {
+    echo "${GREEN}Add /etc/hosts entries${RESET}"
     if [ -r "/vagrant/addhosts.sh" ]; then
         chmod +x /vagrant/addhosts.sh
         /vagrant/addhosts.sh
@@ -375,6 +378,7 @@ function add_hosts {
 }
 
 function add_psql_profile {
+    echo "${GREEN}Add default psql profile to system${RESET}"
     PSQL="/vagrant/scripts/psql.sh"
     if [ -r "${PSQL}" ]; then
         cp ${PSQL} /etc/profile.d/
@@ -384,6 +388,7 @@ function add_psql_profile {
 }
 
 function configure_credentials {
+    echo "${GREEN}Configure the credentials for ${DEPLOY_USER} ${RESET}"
     ## Fix DEPLOY_USER ssh Permissions
     if [ ! -d "/home/${DEPLOY_USER}/.ssh" ]; then
         echo "Creating user SSH dir if it does not exists"
@@ -425,6 +430,7 @@ function configure_credentials {
 }
 
 function config_sysctl {
+    echo "${GREEN}Configure sysctl.conf${RESET}"
     if [ -r "/vagrant/sys/add_sysctl.conf" ]; then
         cat /vagrant/sys/add_sysctl.conf >> /etc/sysctl.conf
         sysctl -p
@@ -464,6 +470,7 @@ function configure_haproxy {
 }
 
 function make_pg_sudoers {
+    echo "${GREEN}Add postgres to sudoer${RESET}"
     if [ -r "/vagrant/scripts/postgres" ]; then
         cp /vagrant/scripts/postgres /etc/sudoers.d/
         chmod 440 /etc/sudoers.d/postgres
