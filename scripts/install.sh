@@ -51,17 +51,6 @@ function install_configure_packages {
     MY_IP=`ifconfig  | grep -E -o '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'`
     # export IP=$MY_IP
 
-    echo "${GREEN}Stopping haproxy${RESET}"
-    [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy stop
-
-    # mkdir /etc/haproxy/certs.d
-
-    echo "Create dhparam file..."
-    #sudo openssl dhparam -dsaparam -out /etc/haproxy/dhparam.pem 4096
-
-    echo "${GREEN}Starting haproxy${RESET}"
-    [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy start
-
     sed -i 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
 
     sudo service sshd restart
@@ -447,6 +436,21 @@ function config_haproxy_generator {
     fi
 }
 
+function configure_haproxy {
+    echo "${GREEN}Stopping haproxy${RESET}"
+    [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy stop
+
+    mkdir /etc/haproxy/certs.d
+    echo "Create dhparam file..."
+    sudo openssl dhparam -dsaparam -out /etc/haproxy/dhparam.pem 4096
+    echo "Reconfiguring haproxy ..."
+    cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg_orig
+    cp /home/vagrant/haproxy-postgresql/configs/${PROJECT_NAME}/haproxy-${PROJECT_NAME}.cnf /etc/haproxy/haproxy.cfg
+    chown -R root:root /etc/haproxy/haproxy.cfg
+    echo "${GREEN}Starting haproxy${RESET}"
+    [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy start
+}
+
 function make_pg_sudoers {
     if [ -r "/vagrant/scripts/postgres" ]; then
         cp /vagrant/scripts/postgres /etc/sudoers.d/
@@ -472,6 +476,7 @@ make_pg_sudoers
 add_hosts
 config_sysctl
 config_haproxy_generator
+configure_haproxy
 #load_postgres_sqlfiles
 #create_bash_alias
 
