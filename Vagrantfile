@@ -195,3 +195,5 @@ Vagrant.configure("2") do |config|
       SCRIPT
     end
 end
+# Check haproxy at http://192.168.88.5:8182/haproxy?stats
+# #
