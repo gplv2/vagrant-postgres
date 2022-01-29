@@ -436,7 +436,7 @@ function config_sysctl {
 }
 
 function config_haproxy_generator {
-   	PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
+    PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
     if [ -r "/home/vagrant/haproxy-postgresql/create_haproxy_check.py" ]; then
         if [ -e "${PGHBA}" ]; then
             cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME} >> ${PGHBA}
@@ -450,7 +450,7 @@ function config_haproxy_generator {
 function make_pg_sudoers {
     if [ -r "/vagrant/scripts/postgres" ]; then
         cp /vagrant/scripts/postgres /etc/sudoers.d/
-	chmod 440 /etc/sudoers.d/postgres
+        chmod 440 /etc/sudoers.d/postgres
     fi
 }
 
