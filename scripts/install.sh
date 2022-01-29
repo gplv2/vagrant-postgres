@@ -311,9 +311,9 @@ function install_configure_postgres {
         fi
         #sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" ${PGCONF}
 	
-	# set the port up in the profile , important when not using standard port
-	sudo su -l postgres -c "echo \"PGPORT=${PORT}\" >> .bash_profile"
-	sudo su -l postgres -c "echo \"export PGPORT\" >> .bash_profile"
+	    # set the port up in the profile , important when not using standard port
+	    sudo su -l postgres -c "echo \"PGPORT=${PORT}\" >> .bash_profile"
+	    sudo su -l postgres -c "echo \"export PGPORT\" >> .bash_profile"
 
         # set permissions
         if [ -e "${PGHBA}" ]; then
@@ -429,15 +429,21 @@ function configure_credentials {
 }
 
 function config_sysctl {
-    if [ -r "/vagrant/ha/add_sysctl.conf" ]; then
-        cat /vagrant/ha/add_sysctl.conf >> /etc/sysctl.conf
+    if [ -r "/vagrant/sys/add_sysctl.conf" ]; then
+        cat /vagrant/sys/add_sysctl.conf >> /etc/sysctl.conf
         sysctl -p
     fi
 }
 
 function config_haproxy_generator {
+   	PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
     if [ -r "/home/vagrant/haproxy-postgresql/create_haproxy_check.py" ]; then
-        cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME}
+        if [ -e "${PGHBA}" ]; then
+            cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME} >> ${PGHBA}
+
+            echo "${GREEN}Reloading Postgresql 11 ${RESET}"
+            systemctl reload postgresql-11
+        fi
     fi
 }
 

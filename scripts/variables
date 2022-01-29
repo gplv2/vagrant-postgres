@@ -13,7 +13,7 @@ CACHE=$(($(free -m|awk '/^Mem:/{print $2}')/3))
 PGEFFECTIVE=$(($(free -m|awk '/^Mem:/{print $2}')/2))
 
 # some defaults
-PROJECT_NAME=testcluster
+PROJECT_NAME=mycluster
 PROJECT_DIRECTORY=/var/www/${PROJECT_NAME}
 DEPLOY_USER=vagrant
 
