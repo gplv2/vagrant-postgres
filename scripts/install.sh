@@ -360,11 +360,15 @@ function add_ssh_opts {
     echo "${GREEN}Create SSH config for user postgres${RESET}"
     PGHOME=`getent passwd postgres | awk -F: '{ print $6 }'`
     SSH_CONFIG=${PGHOME}/.ssh/config
-    if [ -d "${PGHOME}/.ssh" ]; then
-        if [ -f "/vagrant/scripts/ssh_config" ]; then
-            sudo cp /vagrant/scripts/ssh_config ${SSH_CONFIG} 
-            sudo chown postgres:postgres ${SSH_CONFIG}
-            chmod 600 ${SSH_CONFIG}
+
+    if [ ! -e "${SSH_CONFIG}" ]; then
+        echo "${GREEN}Creating config${RESET}"
+
+        sudo cat /vagrant/scripts/ssh_config > ${SSH_CONFIG} 
+        sudo chown postgres:postgres ${SSH_CONFIG}
+        PERMS=$(stat -c "%a" ${SSH_CONFIG})
+        if [ ! "${PERMS}" = "0400" ]; then
+            sudo chmod 0400 ${SSH_CONFIG}
         fi
     fi
 }
