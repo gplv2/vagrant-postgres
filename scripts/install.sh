@@ -491,9 +491,9 @@ install_configure_packages
 install_git_repos
 #make_work_dirs
 #configure_credentials
-add_ssh_opts
 install_configure_postgres
 create_pgpass
+add_ssh_opts
 add_psql_profile
 make_pg_sudoers
 add_hosts
