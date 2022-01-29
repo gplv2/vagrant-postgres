@@ -461,7 +461,7 @@ function config_haproxy_generator {
 
 function configure_haproxy {
     echo "${GREEN}Stopping haproxy${RESET}"
-    [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy stop
+    service haproxy stop
 
     mkdir /etc/haproxy/certs.d
     echo "Create dhparam file..."
@@ -471,7 +471,7 @@ function configure_haproxy {
     cp /home/vagrant/haproxy-postgresql/configs/${PROJECT_NAME}/haproxy-${PROJECT_NAME}.cnf /etc/haproxy/haproxy.cfg
     chown -R root:root /etc/haproxy/haproxy.cfg
     echo "${GREEN}Starting haproxy${RESET}"
-    [ -x /etc/init.d/haproxy ] && /etc/init.d/haproxy start
+    service haproxy start
 }
 
 function make_pg_sudoers {
