@@ -359,7 +359,7 @@ function add_ssh_opts {
     if [ -d "${PGHOME}/.ssh" ]; then
         if [ -r "/vagrant/ssh_config" ]; then
             if [ ! -e "${SSH_CONFIG}" ]; then
-                cp /vagrant/ssh_config ${SSH_CONFIG} 
+                cp /vagrant/scripts/ssh_config ${SSH_CONFIG} 
                 chown postgres:postgres ${SSH_CONFIG}
                 chmod 600 ${SSH_CONFIG}
             fi
