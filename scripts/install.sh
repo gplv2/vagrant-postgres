@@ -298,6 +298,8 @@ function install_configure_postgres {
                 sed -i "s/#checkpoint_timeout = 5min/checkpoint_timeout = 20min/" ${PGCONF}
                 sed -i "s/#max_wal_size = 1GB/max_wal_size = 2GB/" ${PGCONF}
                 sed -i "s/#checkpoint_completion_target = 0.5/checkpoint_completion_target = 0.7/" ${PGCONF}
+                echo "Activating wal log hints"
+                sed -i "s/#wal_log_hints = off/wal_log_hints = on/" ${PGCONF}
             fi
             echo "Done with changing postgresql settings, we need to restart postgres for them to take effect"
             echo "${GREEN}Restarting Postgresql 11 ${RESET}"
@@ -433,9 +435,11 @@ function config_haproxy_generator {
     echo "${GREEN}Generate haproxy file${RESET}"
     PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
     if [ -r "/home/vagrant/haproxy-postgresql/create_haproxy_check.py" ]; then
-    	echo "${GREEN}Found haproxy generator${RESET}"
+        echo "${GREEN}Found haproxy generator${RESET}"
         if [ -e "${PGHBA}" ]; then
-    	    echo "${GREEN}Found pg_hba file${RESET}"
+            echo "Creating config.py ..."
+            /vagrant/scripts/create_haconfig_ini.sh
+            echo "${GREEN}Found pg_hba file${RESET}"
             cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME} >> ${PGHBA}
 
             echo "${GREEN}Reloading Postgresql 11 ${RESET}"
@@ -451,8 +455,6 @@ function configure_haproxy {
     mkdir /etc/haproxy/certs.d
     echo "Create dhparam file..."
     sudo openssl dhparam -dsaparam -out /etc/haproxy/dhparam.pem 4096
-    echo "Creating conpig.py ..."
-    /vagrant/scripts/create_haconfig_ini.sh
     echo "Reconfiguring haproxy ..."
     cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg_orig
     cp /home/vagrant/haproxy-postgresql/configs/${PROJECT_NAME}/haproxy-${PROJECT_NAME}.cnf /etc/haproxy/haproxy.cfg
