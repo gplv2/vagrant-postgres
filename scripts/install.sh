@@ -451,7 +451,8 @@ function config_haproxy_generator {
             /vagrant/scripts/create_haconfig_ini.sh
             echo "${GREEN}Found pg_hba file${RESET}"
             cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME} >> ${PGHBA}
-
+	    # add access for all the rest in the network
+            echo "host    all             all             ${PG_HBA_NET}           md5" >> ${PGHBA}
             echo "${GREEN}Reloading Postgresql 11 ${RESET}"
             systemctl reload postgresql-11
         fi
