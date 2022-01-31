@@ -38,7 +38,7 @@ CREATE DATABASE testdb WITH TEMPLATE = template1 OWNER = test;
 \c testdb
 CREATE EXTENSION IF NOT EXISTS pg_repack WITH SCHEMA public;
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-CREATE EXTENSION IF NOT EXISTS hostname WITH SCHEMA public;
+-- CREATE EXTENSION IF NOT EXISTS hostname WITH SCHEMA public;  -- Needs custom extension that is not in main repo, needs to be compiled
 CREATE EXTENSION IF NOT EXISTS hypopg WITH SCHEMA public;
 -- CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 -- CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
