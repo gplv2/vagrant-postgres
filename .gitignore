@@ -2,6 +2,4 @@
 tmp/*
 iplist.txt
 addhosts.sh
-repmgr/repmgr-master.conf
-repmgr/repmgr-standby.conf
 test.sh
