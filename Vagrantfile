@@ -6,6 +6,8 @@ BOX_IMAGE = "bento/centos-7"
 NODE_COUNT = 2
 IP_PREFIX="192.168.88."
 
+counter = 0
+
 # create ip list for the nodes to use
 def this(file)
   i = 0
@@ -137,6 +139,7 @@ Vagrant.configure("2") do |config|
             subconfig.vm.provision "shell" do |s|
                 s.name = "Installing vagrant bootstrap"
                 s.inline = "sudo " + localscriptDir + "/install.sh"
+                counter+=1
             end
 
             # keepalived setup
@@ -149,6 +152,7 @@ Vagrant.configure("2") do |config|
                 s.name = "Configuring keepalived standby node"
                 s.inline = "sudo /vagrant/keepalived/keepalived.sh -m standby"
               end
+              counter+=1
             end
 
             # repmgr setup
@@ -163,6 +167,7 @@ Vagrant.configure("2") do |config|
                 s.name = "configuring repmgr slave node"
                 s.inline = "sudo /vagrant/repmgr/repmgr.sh -m standby -n " + name + " -i " + number
               end
+              counter+=1
             end
 
             # pgbouncer setup
@@ -177,6 +182,7 @@ Vagrant.configure("2") do |config|
                 s.name = "configuring pgbouncer slave node"
                 s.inline = "sudo /vagrant/pgbouncer/pgbouncer.sh -m standby -n " + name + " -i " + IP_PREFIX+"#{i + 10}"
               end
+              counter+=1
             end
             # Provider-specific configuration so you can fine-tune various
             # backing providers for Vagrant. These expose provider-specific options.
@@ -208,5 +214,75 @@ Vagrant.configure("2") do |config|
       SCRIPT
     end
 end
+
+# if counter == 8 we did all steps successfully, now echo the user the things he can do
+if (counter == 8) then
+  haproxy_url = "http://192.168.88.5:8182/haproxy?stats"
+  puts "Your systems looks ready to test, now you can play and test things out"
+  puts "Visit the haproxy url to see who is master : " + String(haproxy_url)
+  puts ""
+  puts "Login in the second node: vagrant ssh db1 and switch over the cluster like this:"
+  puts "sudo su - "
+  puts "su - postgres"
+  puts "repmgr cluster show"
+  puts "repmgr standby switchover"
+  puts "Then visit the haproxy url and see the role switch result"
+  puts ""
+  puts "To connect to the 'testdb' database you can use different ports which will mean different services"
+  puts "Haproxy (HA/VIP):"
+  puts "Connect to the HA port psql postgres://test:Iceball1@192.168.88.5:5432/testdb"
+  puts ""
+  puts "Database (direct/VIP):"
+  puts "psql postgres://test:Iceball1@192.168.88.5:6432/testdb"
+  puts ""
+  puts "Pgbouncer (VIP):"
+  puts "psql postgres://test:Iceball1@192.168.88.5:7432/testdb"
+  puts ""
+  puts "It's important to understand the differences between those 3 ports"
+  puts "Flow is :  HAPROXY -> PGBOUNCER -> DATABASE"
+  puts ""
+  puts "Every server has a pgbouncer, database and haproxy instance present (and of course a keepalived install)"
+  puts "keepalived will only handle the VIP address, haproxy will only listen on port 5432 on the vip ip and is the only one that will, but since each node has "
+  puts "a haproxy running at all times but it's only listening on the VIP."
+  puts ""
+  puts "So it's important to understand that when connecting to the VIP IP that you always land on the machine where keepalived owns the vip."
+  puts "This doesn't mean its the postgresql master server."
+  puts "The postgresql master server can be diffent from the keepalived master, they are not related at all, they operate independant"
+  puts ""
+  puts "You can still connect to a specific server by using the non-vip IP's"
+  puts ""
+  puts "Connect directly to the DB on node1 (db1)"
+  puts "psql postgres://test:Iceball1@192.168.88.11:6432/testdb"
+  puts ""
+  puts "Connect directly to the DB on node2 (db2)"
+  puts "psql postgres://test:Iceball1@192.168.88.12:6432/testdb"
+  puts ""
+  puts "Connect indirectly to the DB via pgbouncer on node1 (db1)"
+  puts "psql postgres://test:Iceball1@192.168.88.11:7432/testdb"
+  puts ""
+  puts "Connect indirectly to the DB via pgbouncer on node2 (db2)"
+  puts "psql postgres://test:Iceball1@192.168.88.12:7432/testdb"
+  puts ""
+  puts "Now it's time to have some fun watching keepalived in action"
+  puts "Log into keepalived active node (ssh to the vip using vagrant user)"
+  puts "ssh vagrant@192.168.88.5"
+  puts ""
+  puts "Check if the vip ip is present:"
+  puts "type ip a"
+  puts ""
+  puts "Kill or stop keepalived"
+  puts "check again : ip a"
+  puts ""
+  puts "It should be gone now and present on the other node"
+  puts ""
+  puts "Test the database connection to the VIP:"
+  puts "psql postgres://test:Iceball1@192.168.88.5:5432/testdb"
+  puts ""
+  puts "Also check the haproxy interface, should still work again, but the name of the node has changed"
+  puts "Visit the haproxy url to see who is master : " + String(haproxy_url)
+  puts ""
+end
+
+  #
 # Check haproxy at http://192.168.88.5:8182/haproxy?stats
 # #
