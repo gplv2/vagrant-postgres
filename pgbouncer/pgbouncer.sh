@@ -28,8 +28,8 @@ echo "Preparing cluster for pgbouncer installation"
 function install_configure_pgbouncer {
     # DB server
     echo "Configuring pgbouncer ..."
-    echo "Stopping pgbouncer if running"
-    service pgbouncer stop
+    #echo "Stopping pgbouncer if running"
+    #service pgbouncer stop
     mv /etc/pgbouncer/pgbouncer.ini /etc/pgbouncer/pgbouncer.ini.orig
     #cp /tmp/ha/userlist.txt /etc/pgbouncer/userlist.txt
     echo '"pgbouncer" "md54cf2e80a8a9921c588dfe9644fc6a076"' >> /etc/pgbouncer/userlist.txt
