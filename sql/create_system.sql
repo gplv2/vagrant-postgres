@@ -28,14 +28,14 @@ CREATE DATABASE powa WITH TEMPLATE = template1 OWNER = postgres;
 \c powa
 CREATE EXTENSION pg_stat_statements;
 CREATE EXTENSION btree_gist;
--- CREATE EXTENSION powa;
-CREATE EXTENSION pg_qualstats;
--- CREATE EXTENSION pg_stat_kcache;
+CREATE EXTENSION powa;
+-- CREATE EXTENSION pg_qualstats; -- Need preload library !
+-- CREATE EXTENSION pg_stat_kcache; -- Need preload library !
 
 \c postgres
 
 CREATE DATABASE testdb WITH TEMPLATE = template1 OWNER = test;
-\c test
+\c testdb
 CREATE EXTENSION IF NOT EXISTS pg_repack WITH SCHEMA public;
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 CREATE EXTENSION IF NOT EXISTS hostname WITH SCHEMA public;
