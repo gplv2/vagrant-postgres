@@ -17,7 +17,7 @@ echo "Mode: $MODE";
 
 # mode is standby or master
 
-SCRIPTS=/vagrant/pgbouncer/
+SCRIPTS=/vagrant/pgbouncer
 
 function isinstalled {
   if yum list installed "$@" >/dev/null 2>&1; then
@@ -44,7 +44,7 @@ function install_configure_pgbouncer {
 
     if isinstalled pgbouncer ; then
         cat ${SCRIPTS}/pgbouncer-template.ini | sed -e "s/NODE_IP/${NODE_IP}/g ; s/PORT_BOUNCER/${PORT_BOUNCER}/g ; s/PORT/${PORT}/g" > ${SCRIPTS}/pgbouncer.ini
-        cp ${SCRIPTS}pgbouncer.ini /etc/pgbouncer/pgbouncer.ini
+        cp ${SCRIPTS}/pgbouncer.ini /etc/pgbouncer/pgbouncer.ini
         if [ "$MODE" = "master" ]; then
             echo "Master ..."
             echo "Configuring MASTER pgbouncer config file"

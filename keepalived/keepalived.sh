@@ -37,12 +37,12 @@ function install_configure_keepalived {
 
     if [ "$MODE" = "master" ]; then
         echo "Configuring keepalived config file"
-        cat ${SCRIPTS}/keepalived-template-master.conf | sed -e "s/MY_MODE/MASTER/ ; s/MY_CIDR/${MY_CIDR_IP}/" > keepalived-master.conf
+        cat ${SCRIPTS}/keepalived-template-master.conf | sed -e "s/MY_MODE/MASTER/ ; s/MY_CIDR/${MY_CIDR_IP}/" > ${SCRIPTS}/keepalived-master.conf
         cp ${SCRIPTS}/keepalived-master.conf /etc/keepalived/keepalived.conf
     fi
     if [ "$MODE" = "standby" ]; then
         echo "Configuring keepalived config file"
-        cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/BACKUP/ ; s/MY_CIDR/${MY_CIDR_IP}/" > keepalived-standby.conf
+        cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/BACKUP/ ; s/MY_CIDR/${MY_CIDR_IP}/" > ${SCRIPTS}keepalived-standby.conf
         cp ${SCRIPTS}/keepalived-standby.conf /etc/keepalived/keepalived.conf
     fi
     echo "Enable keepalived"

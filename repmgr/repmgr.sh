@@ -30,7 +30,7 @@ echo "Mode: $MODE";
 # 9. Register the standby server
 # 10. Start repmgrd daemon process
 
-SCRIPTS=/vagrant/repmgr/
+SCRIPTS=/vagrant/repmgr
 
 REPMGR="repmgr -f /etc/repmgr/11/repmgr.conf"
 alias repmgr=$REPMGR
