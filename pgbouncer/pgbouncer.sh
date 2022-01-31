@@ -13,7 +13,7 @@ echo "Mode: $MODE";
 
 # mode is standby or master
 
-SCRIPTS=/vagrant/repmgr/
+SCRIPTS=/vagrant/pgbouncer/
 
 function isinstalled {
   if yum list installed "$@" >/dev/null 2>&1; then
@@ -35,17 +35,17 @@ function install_configure_pgbouncer {
     echo '"pgbouncer" "md54cf2e80a8a9921c588dfe9644fc6a076"' >> /etc/pgbouncer/userlist.txt
 
     if isinstalled pgbouncer ; then
+        cat ${SCRIPTS}/pgbouncer-template.ini | sed -e "s/NODE_IP/${NODE_IP}/g ; s/PORT_BOUNCER/${PORT_BOUNCER}/g ; s/PORT/${PORT}/g" > ${SCRIPTS}/pgbouncer.ini
+        cp ${SCRIPTS}pgbouncer.ini /etc/pgbouncer/pgbouncer.ini
         if [ "$MODE" = "master" ]; then
             echo "Master ..."
             echo "Configuring MASTER pgbouncer config file"
-            cat ${SCRIPTS}/pgbouncer-template.ini | sed -e "s/NODE_IP/${NODE_IP}/g ; s/PORT_BOUNCER/${PORT_BOUNCER}/g ; s/PORT/${PORT}/g" > /etc/pgbouncer/pgbouncer.ini
             echo "Preparing Database for use (will take care of pgc/haproxy + pgbouncer)... "
             su - postgres -c "cat /vagrant/sql/create_system.sql | psql -qAtX -p ${PORT}"
         fi
         if [ "$MODE" = "standby" ]; then
-            echo "STANDBY ..."
-            echo "Configuring STANDBY packages"
-            cat ${SCRIPTS}/pgbouncer-template.ini | sed -e "s/NODE_IP/${NODE_IP}/g ; s/PORT_BOUNCER/${PORT_BOUNCER}/g ; s/PORT/${PORT}/g" > /etc/pgbouncer/pgbouncer.ini
+            echo "Standby ..."
+            #echo "Configuring standby packages"
         fi
     fi
     echo "Starting pgbouncer"
