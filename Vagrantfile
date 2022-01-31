@@ -9,7 +9,7 @@ IP_PREFIX="192.168.88."
 # create ip list for the nodes to use
 def this(file)
   i = 0
-  until i>=NODE_COUNT.to_int 
+  until i>=NODE_COUNT.to_int
     i+=1
     ip=IP_PREFIX+"#{i + 10}"
     # Normally 'puts' writes to the standard output stream (STDOUT)
@@ -22,7 +22,7 @@ end
 # create ip list for the nodes to use
 def hosts(file)
   i = 0
-  until i>=NODE_COUNT.to_int 
+  until i>=NODE_COUNT.to_int
     i+=1
     ip=IP_PREFIX+"#{i + 10}"
     name="node"+"#{i}"
@@ -56,7 +56,7 @@ Vagrant.configure("2") do |config|
     # https://docs.vagrantup.com.
     #  create ip list
     # Configure Local Variable To Access Scripts From Remote Location
-    
+
 #    config.trigger.after :up do |trigger|
 #      trigger.name = "Register keys"
 #      trigger.info = "Accepting hosts keys for all machine"
@@ -117,7 +117,7 @@ Vagrant.configure("2") do |config|
             # export VAGRANT_EXPERIMENTAL="disks"
             # it seem to work ok, it would be the disk to put postgresql data on when using big databases
             # subconfig.vm.disk :disk, size: "100GB", name: "extra_disk"
- 
+
             subconfig.vm.provider "virtualbox" do |v|
                 v.customize ["modifyvm", :id, "--memory", 4096 ]
                 v.customize ["modifyvm", :id, "--cpus", 4 ]
@@ -165,6 +165,19 @@ Vagrant.configure("2") do |config|
               end
             end
 
+            # pgbouncer setup
+            name="node"+"#{i}"
+            number="#{i}"
+            subconfig.vm.provision "shell" do |s|
+              #
+              if(i == 1) then
+                s.name = "configuring pgbouncer master node"
+                s.inline = "sudo /vagrant/pgbouncer/pgbouncer.sh -m master -n " + name + " -i " + IP_PREFIX+"#{i + 10}"
+              else
+                s.name = "configuring pgbouncer slave node"
+                s.inline = "sudo /vagrant/pgbouncer/pgbouncer.sh -m standby -n " + name + " -i " + IP_PREFIX+"#{i + 10}"
+              end
+            end
             # Provider-specific configuration so you can fine-tune various
             # backing providers for Vagrant. These expose provider-specific options.
             # Example for VirtualBox:

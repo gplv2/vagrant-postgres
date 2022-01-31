@@ -39,7 +39,7 @@ function isinstalled {
 function install_configure_packages {
     echo "${GREEN}Installing tools${RESET}"
     sudo yum -d1 -q -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
-    
+
     echo "${GREEN}Installing NPM${RESET}"
     sudo curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
 
@@ -53,7 +53,7 @@ function install_configure_packages {
     sudo npm install --global parse-key-value | true
 
     # get our IP address
-    MY_IP=`ifconfig  | grep -E -o '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'`
+    # MY_IP=`ifconfig  | grep -E -o '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'`
     # export IP=$MY_IP
 
     sed -i 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
@@ -154,7 +154,7 @@ function yum_update {
 
 function make_work_dirs {
     echo "${GREEN}Creating dirs${RESET}"
-    CREATEDIRS="/usr/local/src/grb /datadisk2/out"
+    CREATEDIRS="/usr/local/src/example /var/log/otherexample"
 
     for dir in $CREATEDIRS
     do
@@ -309,10 +309,10 @@ function install_configure_postgres {
             systemctl restart postgresql-11
         fi
         #sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" ${PGCONF}
-	
-	    # set the port up in the profile , important when not using standard port
-	    sudo su -l postgres -c "echo \"PGPORT=${PORT}\" >> .bash_profile"
-	    sudo su -l postgres -c "echo \"export PGPORT\" >> .bash_profile"
+    
+        # set the port up in the profile , important when not using standard port
+        sudo su -l postgres -c "echo \"PGPORT=${PORT}\" >> .bash_profile"
+        sudo su -l postgres -c "echo \"export PGPORT\" >> .bash_profile"
 
         # set permissions
         if [ -e "${PGHBA}" ]; then
@@ -451,7 +451,7 @@ function config_haproxy_generator {
             /vagrant/scripts/create_haconfig_ini.sh
             echo "${GREEN}Found pg_hba file${RESET}"
             cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME} >> ${PGHBA}
-	    # add access for all the rest in the network
+        # add access for all the rest in the network
             echo "host    all             all             ${PG_HBA_NET}           md5" >> ${PGHBA}
             echo "${GREEN}Reloading Postgresql 11 ${RESET}"
             systemctl reload postgresql-11

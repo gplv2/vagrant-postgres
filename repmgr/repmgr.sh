@@ -47,53 +47,53 @@ function isinstalled {
 }
 
 function install_configure_repmgr {
-	# DB server
-	if [ "$MODE" = "master" ]; then
-		if isinstalled postgresql11-server ; then
-			echo "Installing repmgr config file"
-			cat ${SCRIPTS}/repmgr-template-node.conf | sed -e "s/NODE_NUMBER/${NODE_NUMBER}/g ; s/NODE_NAME/${NODE_NAME}/g ; s/PORT/${PORT}/g" > ${SCRIPTS}/repmgr-master.conf
-			cp ${SCRIPTS}/repmgr-master.conf /etc/repmgr/11/repmgr.conf
+    # DB server
+    if [ "$MODE" = "master" ]; then
+        if isinstalled postgresql11-server ; then
+            echo "Installing repmgr config file"
+            cat ${SCRIPTS}/repmgr-template-node.conf | sed -e "s/NODE_NUMBER/${NODE_NUMBER}/g ; s/NODE_NAME/${NODE_NAME}/g ; s/PORT/${PORT}/g" > ${SCRIPTS}/repmgr-master.conf
+            cp ${SCRIPTS}/repmgr-master.conf /etc/repmgr/11/repmgr.conf
 
-			echo "Configuring repmgr master DB server ..."
+            echo "Configuring repmgr master DB server ..."
 
-			echo "Preparing Database ... "
+            echo "Preparing Database ... "
 
-			# install extension
-			cat > /tmp/install.repmgr.sql << EOF
+            # install extension
+            cat > /tmp/install.repmgr.sql << EOF
 CREATE EXTENSION repmgr;
 CREATE USER repmgr;
 ALTER USER repmgr WITH SUPERUSER PASSWORD '${REPMGR_PASSWORD}';
 CREATE DATABASE repmgr WITH OWNER repmgr;
 EOF
-			echo "Creating extension and repmgr user"
-			su - postgres -c "cat /tmp/install.repmgr.sql | psql -p ${PORT}"
-			# register the primary  
-			echo "Registering the primary server"
-			su - postgres -c "${REPMGR} primary register"
-		fi
-	fi
-	if [ "$MODE" = "standby" ]; then
-		if isinstalled postgresql11-server ; then
-			echo "Installing repmgr config file"
-			cat ${SCRIPTS}/repmgr-template-node.conf | sed -e "s/NODE_NUMBER/${NODE_NUMBER}/g ; s/NODE_NAME/${NODE_NAME}/g ; s/PORT/${PORT}/g" > ${SCRIPTS}/repmgr-standby.conf
-			cp ${SCRIPTS}/repmgr-standby.conf /etc/repmgr/11/repmgr.conf
+            echo "Creating extension and repmgr user"
+            su - postgres -c "cat /tmp/install.repmgr.sql | psql -p ${PORT}"
+            # register the primary
+            echo "Registering the primary server"
+            su - postgres -c "${REPMGR} primary register"
+        fi
+    fi
+    if [ "$MODE" = "standby" ]; then
+        if isinstalled postgresql11-server ; then
+            echo "Installing repmgr config file"
+            cat ${SCRIPTS}/repmgr-template-node.conf | sed -e "s/NODE_NUMBER/${NODE_NUMBER}/g ; s/NODE_NAME/${NODE_NAME}/g ; s/PORT/${PORT}/g" > ${SCRIPTS}/repmgr-standby.conf
+            cp ${SCRIPTS}/repmgr-standby.conf /etc/repmgr/11/repmgr.conf
 
-			echo "Stopping standby if running"
-			systemctl stop postgresql-11
+            echo "Stopping standby if running"
+            systemctl stop postgresql-11
 
-			echo "Creating a clone from the master server"
-			#su - postgres -c "${REPMGR} -h ${MASTER_IP} -U repmgr -p ${PORT} --copy-external-config-files standby clone -F -c"
-			su - postgres -c "${REPMGR} -h node1 -U repmgr -p ${PORT} standby clone -F -c"
+            echo "Creating a clone from the master server"
+            #su - postgres -c "${REPMGR} -h ${MASTER_IP} -U repmgr -p ${PORT} --copy-external-config-files standby clone -F -c"
+            su - postgres -c "${REPMGR} -h node1 -U repmgr -p ${PORT} standby clone -F -c"
 
-			# starting the standby  
-			echo "Starting the standby"
-			systemctl start postgresql-11
+            # starting the standby
+            echo "Starting the standby"
+            systemctl start postgresql-11
 
-			# register the standby  
-			echo "Registering the standby server"
-			su - postgres -c "${REPMGR} standby register -F"
-		fi
-	fi
+            # register the standby
+            echo "Registering the standby server"
+            su - postgres -c "${REPMGR} standby register -F"
+        fi
+    fi
 }
 
 echo "Start repmgr install tasks..."
