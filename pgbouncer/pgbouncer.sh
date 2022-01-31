@@ -1,5 +1,9 @@
 #!/bin/bash -e
 
+set -o allexport
+source /vagrant/scripts/variables
+set +o allexport
+
 while getopts "m:n:i:" flag
 do
     case "${flag}" in
