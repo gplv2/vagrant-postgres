@@ -1,5 +1,4 @@
 .vagrant
-tmp/*
 iplist.txt
 addhosts.sh
 test.sh
