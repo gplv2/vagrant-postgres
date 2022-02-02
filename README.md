@@ -1,3 +1,19 @@
+# What this is
+
+This vagrant is a local instance of what is used in real life production.  It will build a cluster of Postgres database machines of postgres that will:
+
+ - Be under control of repmgr
+ - with a VIP managed by keepalived
+ - master/slave HA 'sensing' by custom haproxy test configuration with https://github.com/gplv2/haproxy-postgresql
+ - multi slave support
+ - uses Centos because we use Redhat at work (would much rather do this in the debian family)
+ - pgbouncer in front of DB, behind haproxy
+ 
+## how to run
+ - first create the postgresql shared key to setup trust : vagrant push
+ - then : vagrant up
+ - and of course: vagrant ssh db1 , db2 etc
+
 # Your systems looks ready to test, now you can play and test things out 
 Visit the haproxy url to see who is master : http://192.168.88.5:8182/haproxy?stats
 
