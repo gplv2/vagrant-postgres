@@ -32,8 +32,8 @@ if [ "${i}" -gt "2" ]; then
             ips+="${host_ips[$ip]}:${PORT_BOUNCER};"
         fi
     done
-    echo ${ips%;}
-    echo ${names%;}
+#    echo ${ips%;}
+#    echo ${names%;}
     echo "${GREEN}Crafting haproxy file for $i nodes${RESET}"
     cat > /home/vagrant/haproxy-postgresql/config.py <<EOF
 HA_MASTER_NAME = "node1"
