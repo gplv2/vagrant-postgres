@@ -10,7 +10,7 @@ function get_ips {
     do
         host_ips[ $i ]="$line"        
         (( i++ ))
-    done < <(cat /vagrant/iplist.txt)
+    done < <(cat ../iplist.txt)
 
     #for ip in "${host_ips[@]}"
     #do
@@ -22,8 +22,34 @@ function get_ips {
 echo "${GREEN}Getting IPS from all machines${RESET}"
 get_ips
 
-echo "${GREEN}Crafting haproxy file for max 2 nodes (limitation of python generator)${RESET}"
-cat > /home/vagrant/haproxy-postgresql/config.py <<EOF
+if [ "${i}" -gt "2" ]; then
+    # more than 2 nodes, going multinode
+    for ip in "${!host_ips[@]}";
+    do
+        index="$((${ip}+1))"
+        if [ "${ip}" -gt "0" ]; then
+            names+="node${index};"
+            ips+="${host_ips[$ip]}:${PORT_BOUNCER};"
+        fi
+    done
+    echo ${ips%;}
+    echo ${names%;}
+    echo "${GREEN}Crafting haproxy file for $i nodes${RESET}"
+    cat > /home/vagrant/haproxy-postgresql/config.py <<EOF
+HA_MASTER_NAME = "node1"
+HA_MASTER_DSN = "${host_ips[0]}:${PORT_BOUNCER}"
+HA_STANDBY_NAMES = "${names%;}"
+HA_STANDBY_DSN = "${ips%;}"
+HA_CHECK_USER = "pgc"
+HA_CHECK_PORT = "${PORT}"
+HA_LISTEN_PORT = "${PORT_HAPROXY}"
+HA_STATS_USER = "pgadmin"
+HA_STATS_PASSWORD = "pgsecret"
+HA_VIP_IP = "${MY_CIDR_IP}"
+EOF
+else
+    echo "${GREEN}Crafting haproxy file for max 2 nodes${RESET}"
+    cat > /home/vagrant/haproxy-postgresql/config.py <<EOF
 HA_MASTER_NAME = "node1"
 HA_MASTER_DSN = "${host_ips[0]}:${PORT_BOUNCER}"
 HA_STANDBY_NAME = "node2"
@@ -35,3 +61,4 @@ HA_STATS_USER = "pgadmin"
 HA_STATS_PASSWORD = "pgsecret"
 HA_VIP_IP = "${MY_CIDR_IP}"
 EOF
+fi
