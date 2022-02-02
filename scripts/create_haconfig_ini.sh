@@ -10,7 +10,7 @@ function get_ips {
     do
         host_ips[ $i ]="$line"        
         (( i++ ))
-    done < <(cat ../iplist.txt)
+    done < <(cat /vagrant/iplist.txt)
 
     #for ip in "${host_ips[@]}"
     #do
