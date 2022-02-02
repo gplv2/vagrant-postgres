@@ -38,7 +38,7 @@ if [ "${i}" -gt "2" ]; then
     cat > /home/vagrant/haproxy-postgresql/config.py <<EOF
 HA_MASTER_NAME = "node1"
 HA_MASTER_DSN = "${host_ips[0]}:${PORT_BOUNCER}"
-HA_STANDBY_NAMES = "${names%;}"
+HA_STANDBY_NAME = "${names%;}"
 HA_STANDBY_DSN = "${ips%;}"
 HA_CHECK_USER = "pgc"
 HA_CHECK_PORT = "${PORT}"
