@@ -1,1 +1,1 @@
-export PATH="/usr/pgsql-PGVERSION/bin:$PATH"
+export PATH="/usr/pgsql-12/bin:$PATH"

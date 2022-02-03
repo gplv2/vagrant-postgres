@@ -380,11 +380,11 @@ function add_hosts {
 function add_psql_profile {
     echo "${GREEN}Add default psql profile to system${RESET}"
     PSQL="/vagrant/scripts/psql.sh"
+    PROF="/etc/profile.d/${PSQL}"
     if [ -r "${PSQL}" ]; then
-        sed -i "s/PGVERSION/${PGVERSION}/" ${PSQL}
-        cp ${PSQL} /etc/profile.d/
-        chown root:root  ${PSQL}
-        chmod +x ${PSQL}
+        sed "s/PGVERSION/${PGVERSION}/" > ${PROF}
+        chown root:root  ${PROF}
+        chmod +x ${PROF}
     fi
 }
 
