@@ -8,7 +8,12 @@ This vagrant is a local instance of what is used in real life production.  It wi
  - multi slave support
  - uses Centos because we use Redhat at work (would much rather do this in the debian family)
  - pgbouncer in front of DB, behind haproxy
- 
+
+## Different postgres versions supported
+
+Tested version at the moment  : PG 11 and PG 12
+Set your version in the scripts/variables file 
+
 ## how to run
  - first create the postgresql shared key to setup trust : vagrant push
  - then : vagrant up
