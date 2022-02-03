@@ -381,7 +381,7 @@ function add_psql_profile {
     echo "${GREEN}Add default psql profile to system${RESET}"
     PSQL="/vagrant/scripts/psql.sh"
     if [ -r "${PSQL}" ]; then
-        sed -i "s/11/${PGVERSION}/" ${PSQL}
+        sed -i "s/PGVERSION/${PGVERSION}/" ${PSQL}
         cp ${PSQL} /etc/profile.d/
         chown root:root  ${PSQL}
         chmod +x ${PSQL}

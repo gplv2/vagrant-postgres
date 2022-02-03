@@ -32,7 +32,7 @@ echo "Mode: $MODE";
 
 SCRIPTS=/vagrant/repmgr
 
-REPMGR="repmgr -f /etc/repmgr/11/repmgr.conf"
+REPMGR="repmgr -f /etc/repmgr/${PGVERSION}/repmgr.conf"
 alias repmgr=$REPMGR
 
 echo "Preparing cluster for repmgr installation"
@@ -48,10 +48,10 @@ function isinstalled {
 function install_configure_repmgr {
     # DB server
     if [ "$MODE" = "master" ]; then
-        if isinstalled postgresql11-server ; then
+        if isinstalled postgresql${PGVERSION}-server ; then
             echo "Installing repmgr config file"
-            cat ${SCRIPTS}/repmgr-template-node.conf | sed -e "s/NODE_NUMBER/${NODE_NUMBER}/g ; s/NODE_NAME/${NODE_NAME}/g ; s/PORT/${PORT}/g" > ${SCRIPTS}/repmgr-master.conf
-            cp ${SCRIPTS}/repmgr-master.conf /etc/repmgr/11/repmgr.conf
+            cat ${SCRIPTS}/repmgr-template-node.conf | sed -e "s/NODE_NUMBER/${NODE_NUMBER}/g ; s/NODE_NAME/${NODE_NAME}/g ; s/PORT/${PORT}/g ; s/11/${PGVERSION}/g" > ${SCRIPTS}/repmgr-master.conf
+            cp ${SCRIPTS}/repmgr-master.conf /etc/repmgr/${PGVERSION}/repmgr.conf
 
             echo "Configuring repmgr master DB server ..."
 
@@ -72,13 +72,13 @@ EOF
         fi
     fi
     if [ "$MODE" = "standby" ]; then
-        if isinstalled postgresql11-server ; then
+        if isinstalled postgresql${PGVERSION}-server ; then
             echo "Installing repmgr config file"
-            cat ${SCRIPTS}/repmgr-template-node.conf | sed -e "s/NODE_NUMBER/${NODE_NUMBER}/g ; s/NODE_NAME/${NODE_NAME}/g ; s/PORT/${PORT}/g" > ${SCRIPTS}/repmgr-standby.conf
-            cp ${SCRIPTS}/repmgr-standby.conf /etc/repmgr/11/repmgr.conf
+            cat ${SCRIPTS}/repmgr-template-node.conf | sed -e "s/NODE_NUMBER/${NODE_NUMBER}/g ; s/NODE_NAME/${NODE_NAME}/g ; s/PORT/${PORT}/g ; s/11/${PGVERSION}/g" > ${SCRIPTS}/repmgr-standby.conf
+            cp ${SCRIPTS}/repmgr-standby.conf /etc/repmgr/${PGVERSION}/repmgr.conf
 
             echo "Stopping standby if running"
-            systemctl stop postgresql-11
+            systemctl stop postgresql-${PGVERSION}
 
             echo "Creating a clone from the master server"
             #su - postgres -c "${REPMGR} -h ${MASTER_IP} -U repmgr -p ${PORT} --copy-external-config-files standby clone -F -c"
@@ -86,7 +86,7 @@ EOF
 
             # starting the standby
             echo "Starting the standby"
-            systemctl start postgresql-11
+            systemctl start postgresql-${PGVERSION}
 
             # register the standby
             echo "Registering the standby server"
