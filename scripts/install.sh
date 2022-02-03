@@ -382,7 +382,7 @@ function add_psql_profile {
     PSQL="/vagrant/scripts/psql.sh"
     PROF="/etc/profile.d/${PSQL}"
     if [ -r "${PSQL}" ]; then
-        sed "s/PGVERSION/${PGVERSION}/" > ${PROF}
+        cat ${PSQL} | sed "s/PGVERSION/${PGVERSION}/" > ${PROF}
         chown root:root  ${PROF}
         chmod +x ${PROF}
     fi
