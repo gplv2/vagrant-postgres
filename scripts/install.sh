@@ -222,40 +222,36 @@ function install_configure_postgres {
     echo "${GREEN}Install EPEL packages ...${RESET}"
     sudo yum -d1 -q -y install sipcalc ccze yum-utils
 
-    #sudo yum install -d1 -y http://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat11-11-2.noarch.rpm
-    #sudo yum -d1 -q -y install http://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
     sudo yum -d1 -q -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-
-    #sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
     echo "Disable stock postgresql..."
     sudo yum-config-manager  --save --setopt=base.exclude=postgres* 1> /dev/null 2>&1
     sudo yum-config-manager  --save --setopt=updates.exclude=postgres* 1> /dev/null 2>&1
 
-    echo "Install PG 11 packages ..."
-    sudo yum-config-manager --enable pgdg11 1> /dev/null 2>&1
+    echo "Install PG ${PGVERSION} packages ..."
+    sudo yum-config-manager --enable pgdg${PGVERSION} 1> /dev/null 2>&1
 
-    sudo yum -d1 -q -y install postgresql11.x86_64 postgresql11-contrib.x86_64 postgresql11-libs.x86_64 postgresql11-server.x86_64 python36
+    sudo yum -d1 -q -y install postgresql${PGVERSION}.x86_64 postgresql${PGVERSION}-contrib.x86_64 postgresql${PGVERSION}-libs.x86_64 postgresql${PGVERSION}-server.x86_64 python36
 
-    echo "Install PG 11 extensions ..."
-    sudo yum -d1 -q -y install repmgr_11.x86_64 powa_11.x86_64 pg_stat_kcache_11.x86_64 pg_qualstats_11.x86_64 pg_repack_11.x86_64
-    #sudo yum -d1 -q -y install powa_11-web.x86_64  # powaweb is not resolving ok in repo
+    echo "Install PG ${PGVERSION} extensions ..."
+    sudo yum -d1 -q -y install repmgr_${PGVERSION}.x86_64 powa_${PGVERSION}.x86_64 pg_stat_kcache_${PGVERSION}.x86_64 pg_qualstats_${PGVERSION}.x86_64 pg_repack_${PGVERSION}.x86_64
+    #sudo yum -d1 -q -y install powa_${PGVERSION}-web.x86_64  # powaweb is not resolving ok in repo
 
-    #echo "Install PG 11 barman cli ..."
+    #echo "Install PG ${PGVERSION} barman cli ..."
     #sudo yum -d1 -q -y install barman-cli
 
-    echo "Init database ... $1 / $2 "
-    sudo /usr/pgsql-11/bin/postgresql-11-setup initdb
+    echo "Init database ..."
+    sudo /usr/pgsql-${PGVERSION}/bin/postgresql-${PGVERSION}-setup initdb
 
-    echo "Enable startup service database ... $1 / $2 "
-    sudo systemctl enable --now postgresql-11
+    echo "Enable startup service database ..."
+    sudo systemctl enable --now postgresql-${PGVERSION}
 
-    echo "Status database ... $1 / $2 "
-    sudo systemctl status postgresql-11
+    echo "Status database ..."
+    sudo systemctl status postgresql-${PGVERSION}
 
     echo "${GREEN}Checking if postgres is installed ...${RESET}"
     # test for postgres install
-    if isinstalled postgresql11 ; then
+    if isinstalled postgresql${PGVERSION} ; then
         echo "${GREEN}Tuning configuration${RESET}"
         #echo "Setting up shared mem"
         #chmod +x /usr/local/bin/shmsetup.sh
@@ -263,8 +259,8 @@ function install_configure_postgres {
 
         echo "${GREEN}Installing postgres DB server ...${RESET}"
 
-        PGCONF="/var/lib/pgsql/11/data/postgresql.conf"
-        PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
+        PGCONF="/var/lib/pgsql/${PGVERSION}/data/postgresql.conf"
+        PGHBA="/var/lib/pgsql/${PGVERSION}/data/pg_hba.conf"
 
         # enable listen
         if [ -e "${PGCONF}" ]; then
@@ -305,8 +301,8 @@ function install_configure_postgres {
                 sed -i "s/#wal_log_hints = off/wal_log_hints = on/" ${PGCONF}
             fi
             echo "Done with changing postgresql settings, we need to restart postgres for them to take effect"
-            echo "${GREEN}Restarting Postgresql 11 ${RESET}"
-            systemctl restart postgresql-11
+            echo "${GREEN}Restarting Postgresql ${PGVERSION} ${RESET}"
+            systemctl restart postgresql-${PGVERSION}
         fi
         #sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" ${PGCONF}
     
@@ -385,6 +381,7 @@ function add_psql_profile {
     echo "${GREEN}Add default psql profile to system${RESET}"
     PSQL="/vagrant/scripts/psql.sh"
     if [ -r "${PSQL}" ]; then
+        sed -i "s/11/${PGVERSION}/" ${PSQL}
         cp ${PSQL} /etc/profile.d/
         chown root:root  ${PSQL}
         chmod +x ${PSQL}
@@ -443,7 +440,7 @@ function config_sysctl {
 
 function config_haproxy_generator {
     echo "${GREEN}Generate haproxy file${RESET}"
-    PGHBA="/var/lib/pgsql/11/data/pg_hba.conf"
+    PGHBA="/var/lib/pgsql/${PGVERSION}/data/pg_hba.conf"
     if [ -r "/home/vagrant/haproxy-postgresql/create_haproxy_check.py" ]; then
         echo "${GREEN}Found haproxy generator${RESET}"
         if [ -e "${PGHBA}" ]; then
@@ -453,8 +450,8 @@ function config_haproxy_generator {
             cd /home/vagrant/haproxy-postgresql && /home/vagrant/haproxy-postgresql/create_haproxy_check.py standby ${PROJECT_NAME} >> ${PGHBA}
         # add access for all the rest in the network
             echo "host    all             all             ${PG_HBA_NET}           md5" >> ${PGHBA}
-            echo "${GREEN}Reloading Postgresql 11 ${RESET}"
-            systemctl reload postgresql-11
+            echo "${GREEN}Reloading Postgresql ${PGVERSION} ${RESET}"
+            systemctl reload postgresql-${PGVERSION}
         fi
     fi
 }

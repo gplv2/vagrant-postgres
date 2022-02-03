@@ -1,28 +1,28 @@
 #!/usr/bin/env bash
-echo "Installing postgres repositories ... $1 / $2 "
+echo "Installing postgres repositories ..."
 
 sudo yum -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
 sudo yum -y install epel-release yum-utils
-sudo yum-config-manager --enable pgdg11
+sudo yum-config-manager --enable pgdg${PGVERSION}
 
-echo "Installing postgres ... $1 / $2 "
+echo "Installing postgres ... "
 
-sudo yum -y install postgresql11-server postgresql11
+sudo yum -y install postgresql${PGVERSION}-server postgresql${PGVERSION}
 
 
-echo "Init database ... $1 / $2 "
-sudo /usr/pgsql-11/bin/postgresql-11-setup initdb
+echo "Init database ... "
+sudo /usr/pgsql-${PGVERSION}/bin/postgresql-${PGVERSION}-setup initdb
 
-echo "Enable startup service database ... $1 / $2 "
-sudo systemctl enable --now postgresql-11
+echo "Enable startup service database ... "
+sudo systemctl enable --now postgresql-${PGVERSION}
 
-echo "Start database ... $1 / $2 "
-systemctl status postgresql-11
+echo "Start database ... "
+systemctl status postgresql-${PGVERSION}
 
 exit 0
 
-echo "Preparing Database content ... $1 / $2 "
+echo "Preparing Database content ... "
 
 DB=$1;
 USER=$2;
@@ -36,7 +36,7 @@ fi
 
 echo "Changing user password ..."
 cat > /home/vagrant/install.postcreate.sql << EOF
-ALTER USER "$USER" WITH PASSWORD 'Berkensap11';
+ALTER USER "$USER" WITH PASSWORD 'Berkensap${PGVERSION}';
 EOF
 
 su - postgres -c "cat /home/vagrant/install.postcreate.sql | psql -d $DB"

@@ -65,7 +65,7 @@ function install_configure_pg {
     echo "Changing pg_hba to add the local subnet derived from interface to the end"
     echo $BLOCK_TO_ADD >> $PGCONF/pg_hba.conf
     echo "Reloading postgres...."
-    service postgresql-11 reload
+    service postgresql-${PGVERSION} reload
 }
 
 function enable_pgbouncer {
