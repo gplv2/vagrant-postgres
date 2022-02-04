@@ -11,7 +11,7 @@ This vagrant is a local instance of what is used in real life production.  It wi
 
 ## Different postgres versions supported
 
-Tested version at the moment  : PG 11 and PG 12
+Tested version at the moment  : PG 11 and PG 12, PG 13
 Set your version in the scripts/variables file 
 
 ## how to run
@@ -22,12 +22,13 @@ Set your version in the scripts/variables file
 # Your systems looks ready to test, now you can play and test things out 
 Visit the haproxy url to see who is master : http://192.168.88.5:8182/haproxy?stats
 
-Login in the second node: vagrant ssh db1 and switch over the cluster like this:
+Login in the second node: vagrant ssh db2 and switch over the cluster like this:
 
-sudo su - 
-su - postgres
-repmgr cluster show
-repmgr standby switchover
+   sudo su -
+   su - postgres
+   repmgr cluster show
+   repmgr standby switchover
+
 Then visit the haproxy url and see the role switch result
 
 To connect to the 'testdb' database you can use different ports which will mean different services
@@ -36,10 +37,10 @@ To connect to the 'testdb' database you can use different ports which will mean 
 Connect to the HA port psql postgres://test:Iceball1@192.168.88.5:5432/testdb
 
 # Database (direct/VIP):
-psql postgres://test:Iceball1@192.168.88.5:6432/testdb
+   psql postgres://test:Iceball1@192.168.88.5:6432/testdb
 
 # Pgbouncer (VIP):
-psql postgres://test:Iceball1@192.168.88.5:7432/testdb
+   psql postgres://test:Iceball1@192.168.88.5:7432/testdb
 
 It's important to understand the differences between those 3 ports
 Flow is :  HAPROXY -> PGBOUNCER -> DATABASE
@@ -60,16 +61,16 @@ The postgresql master server can be diffent from the keepalived master, they are
 You can still connect to a specific server by using the non-vip IP's
 
 ## Connect directly to the DB on node1 (db1)
-psql postgres://test:Iceball1@192.168.88.11:6432/testdb
+   psql postgres://test:Iceball1@192.168.88.11:6432/testdb
 
 ## Connect directly to the DB on node2 (db2)
-psql postgres://test:Iceball1@192.168.88.12:6432/testdb
+   psql postgres://test:Iceball1@192.168.88.12:6432/testdb
 
 ## Connect indirectly to the DB via pgbouncer on node1 (db1)
-psql postgres://test:Iceball1@192.168.88.11:7432/testdb
+   psql postgres://test:Iceball1@192.168.88.11:7432/testdb
 
 ## Connect indirectly to the DB via pgbouncer on node2 (db2)
-psql postgres://test:Iceball1@192.168.88.12:7432/testdb
+   psql postgres://test:Iceball1@192.168.88.12:7432/testdb
 
 # playtime
 
@@ -78,15 +79,15 @@ Log into keepalived active node (ssh to the vip using vagrant user)
 ssh vagrant@192.168.88.5
 
 Check if the vip ip is present:
-type ip a
+   type ip a
 
 Kill or stop keepalived
-check again : ip a
+   check again : ip a
 
 It should be gone now and present on the other node
 
 Test the database connection to the VIP:
-psql postgres://test:Iceball1@192.168.88.5:5432/testdb
+   psql postgres://test:Iceball1@192.168.88.5:5432/testdb
 
 Also check the haproxy interface, should still work again, but the name of the node has changed
 Visit the haproxy url to see who is master : http://192.168.88.5:8182/haproxy?stats
