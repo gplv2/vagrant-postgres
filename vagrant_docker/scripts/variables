@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+# parameters to tune programs, processes and machine
+# count cores
+CORES=$(nproc --all || getconf _NPROCESSORS_ONLN)
+# Processing threads for programs based on CPU count
+THREADS=$((${CORES}-1))
+DOUBLETHREADS=$((${CORES}*2))
+
+# memory sizing for postgres
+FREEMEM=$(free -m|awk '/^Mem:/{print $2}')
+CACHE=$(($(free -m|awk '/^Mem:/{print $2}')/3))
+PGEFFECTIVE=$(($(free -m|awk '/^Mem:/{print $2}')/2))
+
+# some defaults
+PROJECT_NAME=mycluster
+PROJECT_DIRECTORY=/var/www/${PROJECT_NAME}
+DEPLOY_USER=vagrant
+
+# postgres
+PGVERSION=13
+PORT=6432
+PORT_BOUNCER=7432
+PORT_HAPROXY=5432
+
+PG_HBA_NET="192.168.88.0/24"
+
+# network range for keepalived (use escaped since we use sed to create templates
+MY_CIDR_IP="192.168.88.5\/24"
+
+# repmgr
+REPMGR_PASSWORD="ThaReplicator"
+
