@@ -1,6 +1,6 @@
 # -*- mode: ruby -*- vi: set ft=ruby :
 
-NODE_COUNT = 2
+NODE_COUNT = 1
 IP_PREFIX="192.168.88."
 
 # create ip list for the nodes to use
@@ -135,9 +135,14 @@ Vagrant.configure("2") do |config|
    #     SHELL
    #   end
 
+##      subconfig.vm.provision "ansible" do |ansible|
+##        # name = "Hooking up Ansible bootstrap"
+##        ansible.playbook = "postgres.yml"
+##      end
+
       subconfig.vm.provision "ansible" do |ansible|
         # name = "Hooking up Ansible bootstrap"
-        ansible.playbook = "postgres.yml"
+        ansible.playbook = "percona.yml"
       end
 
       subconfig.vm.provision "shell" do |s|

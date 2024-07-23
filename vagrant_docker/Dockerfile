@@ -10,14 +10,20 @@ ENV TZ=Europe/Brussels
 
 EXPOSE 5432
 EXPOSE 3306
+EXPOSE 4567
+EXPOSE 4568
+EXPOSE 4444
+EXPOSE 9200
 
 RUN apt-get upgrade
 RUN apt-get update -y && apt-get dist-upgrade -y
 
-RUN apt-get update -y && apt-get -y install mariadb-server tzdata sudo systemd openssh-client puppet haproxy 
+RUN apt-get update -y && apt-get -y install tzdata sudo systemd openssh-client puppet haproxy
 RUN apt-get install -y keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump haproxy keepalived pgbouncer 
 RUN apt-get install -y git openssl curl wget net-tools psmisc tcpdump sipcalc software-properties-common
 RUN apt-get install -y vim curl wget gpg gnupg2 apt-transport-https lsb-release ca-certificates
+RUN apt-get install -y gnupg2 lsb-release
+RUN apt-get install -y iptables telnet rsync
 RUN apt-get clean
 
 # Install system dependencies, you may not need all of these
