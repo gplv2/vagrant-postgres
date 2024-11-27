@@ -1,5 +1,0 @@
---- 
-- name: IPv4
-  ansible.builtin.debug:
-    msg:
-    ipv4: "{{ ansible_facts['env'].SSH_CONNECTION.split(' ')[2] }}"

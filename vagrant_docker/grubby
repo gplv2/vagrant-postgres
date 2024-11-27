@@ -1,2 +1,0 @@
-    grubby --args="user_namespace.enable=1" --update-kernel="$(grubby --default-kernel)"
-

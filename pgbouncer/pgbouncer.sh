@@ -19,8 +19,10 @@ echo "Mode: $MODE";
 
 SCRIPTS=/vagrant/pgbouncer
 
+
+
 function isinstalled {
-  if yum list installed "$@" >/dev/null 2>&1; then
+  if dnf list installed "$@" >/dev/null 2>&1; then
     true
   else
     false
@@ -30,8 +32,10 @@ function isinstalled {
 echo "Preparing cluster for pgbouncer installation"
 
 function install_configure_pgbouncer {
-    echo "Installing Pgbouncer"
-    sudo yum -d1 -q -y install pgbouncer
+    if ! isinstalled pgbouncer ; then
+        echo "Installing Pgbouncer"
+        sudo dnf -d1 -q -y install pgbouncer
+    }
     # DB server
     echo "Configuring pgbouncer ..."
     #echo "Stopping pgbouncer if running"
@@ -76,9 +80,8 @@ function enable_pgbouncer {
 
 echo "Start pgbouncer install tasks..."
 
-#install_configure_pg
-enable_pgbouncer
 install_configure_pgbouncer
+enable_pgbouncer
 
 echo "pgbouncer installation done"
 

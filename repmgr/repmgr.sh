@@ -38,7 +38,7 @@ alias repmgr=$REPMGR
 echo "Preparing cluster for repmgr installation"
 
 function isinstalled {
-  if yum list installed "$@" >/dev/null 2>&1; then
+  if dnf list installed "$@" >/dev/null 2>&1; then
     true
   else
     false

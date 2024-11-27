@@ -1,1 +1,0 @@
-alias repmgr='repmgr -f /etc/repmgr/11/repmgr.conf'

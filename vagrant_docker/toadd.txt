@@ -1,7 +1,0 @@
-[sst]
-encrypt=4
-ssl-key=server-key.pem
-ssl-ca=ca.pem
-ssl-cert=server-cert.pem
-
-

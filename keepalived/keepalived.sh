@@ -19,7 +19,7 @@ INSTANCE=vagrant
 SCRIPTS=/vagrant/keepalived/
 
 function isinstalled {
-    if yum list installed "$@" >/dev/null 2>&1; then
+    if dnf list installed "$@" >/dev/null 2>&1; then
         true
     else
         false
@@ -59,8 +59,8 @@ function enable_keepalived {
 
 echo "Start keepalived install tasks..."
 
-enable_keepalived
 install_configure_keepalived
+enable_keepalived
 
 echo "keepalived installation done"
 

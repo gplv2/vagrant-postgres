@@ -1,1 +1,0 @@
-postgresql-14 postgresql-client-14 postgresql-14-cron postgresql-14-hypopg postgresql-14-pg-stat-kcache postgresql-14-pg-qualstats postgresql-14-repack postgresql-14-repmgr 

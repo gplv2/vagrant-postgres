@@ -1,4 +1,0 @@
-db_user: root
-db_password: 
-db_name: app1
-ansible_python_interpreter: /usr/bin/python3

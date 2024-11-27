@@ -37,8 +37,9 @@ function isinstalled {
 }
 
 function install_configure_packages {
+    # not used now, too soon for some packages
     echo "${GREEN}Installing tools${RESET}"
-    sudo dnf -d1 -q -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
+    sudo dnf -d1 -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
 
 #    echo "${GREEN}Installing NPM${RESET}"
 #    sudo curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
@@ -147,7 +148,7 @@ function install_git_repos {
 }
 
 function dnf_update {
-    echo "${GREEN}Updating system${RESET}"
+    echo "${GREEN}Updating DNF system${RESET}"
     dnf -d1 -q -y update
     echo "${GREEN}Update done${RESET}"
 }
@@ -230,13 +231,28 @@ function install_configure_postgres {
     sudo dnf-config-manager  --save --setopt=base.exclude=postgres* 1> /dev/null 2>&1
     sudo dnf-config-manager  --save --setopt=updates.exclude=postgres* 1> /dev/null 2>&1
 
+    echo "Install EPEL release ..."
+    sudo dnf install -y epel-release
+    sudo dnf config-manager --set-enabled epel
+
     sudo dnf update -y
 
+    echo "Install Extra ${PGVERSION} packages ..."
+    sudo dnf -d1 -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
+
+    sudo systemctl enable --now haproxy
+    sudo systemctl status haproxy
+
+    sudo systemctl enable --now keepalived
+    sudo systemctl status keepalived
+
+    sudo systemctl enable --now pgbouncer
+    sudo systemctl status pgbouncer
+
     echo "Install PG ${PGVERSION} packages ..."
-    sudo dnf-config-manager --enable pgdg${PGVERSION} 1> /dev/null 2>&1
+    #sudo dnf-config-manager --enable pgdg${PGVERSION} 1> /dev/null 2>&1
 
     sudo dnf install -y postgresql${PGVERSION}-server postgresql${PGVERSION}
-    #sudo dnf -d1 -q -y install postgresql${PGVERSION}.x86_64 postgresql${PGVERSION}-contrib.x86_64 postgresql${PGVERSION}-libs.x86_64 postgresql${PGVERSION}-server.x86_64 python36
 
     echo "Install PG ${PGVERSION} extensions ..."
     sudo dnf -d1 -q -y install repmgr_${PGVERSION}.x86_64 powa_${PGVERSION}.x86_64 pg_stat_kcache_${PGVERSION}.x86_64 pg_qualstats_${PGVERSION}.x86_64 pg_repack_${PGVERSION}.x86_64
@@ -489,7 +505,7 @@ echo "${GREEN}Start provisioning postgresql ${RESET}"
 #fix_locales
 #create_deploy_user
 #install_extra_packages
-#dnf_update
+dnf_update
 install_configure_packages
 install_git_repos
 #make_work_dirs
@@ -499,10 +515,11 @@ create_pgpass
 add_ssh_opts
 add_psql_profile
 make_pg_sudoers
-add_hosts
+#add_hosts
 config_sysctl
 config_haproxy_generator
 configure_haproxy
+dnf_update
 #load_postgres_sqlfiles
 #create_bash_alias
 

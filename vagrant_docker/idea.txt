@@ -1,4 +1,0 @@
-Could use some debconf to automate like :
-
-echo "percona-xtradb-cluster-server-5.7   percona-xtradb-cluster-server-5.7/root-pass password my_temp_password" | debconf-set-selections
-echo "percona-xtradb-cluster-server-5.7   percona-xtradb-cluster-server-5.7/re-root-pass  password my_temp_password" | debconf-set-selections
