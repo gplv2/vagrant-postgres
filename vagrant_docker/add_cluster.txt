@@ -1,0 +1,8 @@
+wsrep_cluster_address=gcomm://192.168.88.11,192.168.88.12,192.168.88.13
+wsrep_node_name=pxc1
+wsrep_node_address=192.168.88.11
+pxc_strict_mode=ENFORCING
+
+wsrep_provider_options="socket.ssl_key=server-key.pem;socket.ssl_cert=server-cert.pem;socket.ssl_ca=ca.pem"
+
+

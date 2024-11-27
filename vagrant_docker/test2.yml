@@ -1,0 +1,2 @@
+- hosts: all
+  - name: IPv4 ansible.builtin.debug: msg: ipv4: "{{ ansible_facts['default_ipv4']['address'] }}"

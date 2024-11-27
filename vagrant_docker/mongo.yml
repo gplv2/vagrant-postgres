@@ -1,0 +1,111 @@
+---
+- name: install percona rpms, Deploy PSMDB RS
+  hosts: all
+  become: yes
+  tasks:
+    - name: install percona key
+      rpm_key:
+        key: https://downloads.percona.com/downloads/RPM-GPG-KEY-percona
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: install percona repo
+      package:
+        name: "https://repo.percona.com/yum/percona-release-latest.noarch.rpm"
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: install deb files from repo
+      become: yes
+      block:
+        - name: download percona repo
+          get_url:
+            url: "https://repo.percona.com/apt/percona-release_latest.focal_all.deb"
+            dest: /home/percona
+          when: ansible_os_family == "Debian"
+
+        - name: install repo
+          apt:
+            deb: /home/percona/percona-release_latest.focal_all.deb
+          when: ansible_os_family == "Debian"
+
+        - name: Update and upgrade apt packages
+          apt:
+            update_cache: yes
+          when: ansible_os_family == "Debian"  
+
+    - name: Enable specific version
+      shell: "/usr/bin/percona-release enable {{ repo_version }} && /usr/bin/percona-release enable tools"
+
+    - name: install packages
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items: "{{ packages }}"
+
+    - name: copy mongod.conf to rs member
+      become: yes
+      template:
+        src: templates/mongod-replicaset.conf.j2
+        dest: /etc/mongod.conf
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: copy init-rs.js file to initialize the replica set
+      template:
+        src: templates/init-rs.js.j2
+        dest: /tmp/init-rs.js
+        mode: 0644
+      when: mongodb_primary is defined and mongodb_primary
+   
+    - name: bootstrap replica sets
+      block:
+        - name: create the datadir
+          become: yes
+          file:
+            path: "{{ mongod_path }}"
+            owner: mongod
+            mode: '0750'
+            state: directory
+
+        - name: set up keyfile if not using ssl
+          become: yes
+          copy:
+            dest: "{{ keyFile_location }}"
+            content: "{{ keyfile_content }}"
+            owner: mongod
+            group: root
+            mode: 0600
+          when: not use_tls | bool
+
+        - name: start mongod on rs member
+          become: yes
+          service:
+            name: mongod
+            state: restarted
+
+        - name: wait for few secs so servers finish starting
+          pause:
+            seconds: 15
+
+        - name: run the init command for rs 
+          shell: mongo {{ mongo_extra_args | default("") }} --port {{ rs_port}} < /tmp/init-rs.js
+          when: mongodb_primary is defined and mongodb_primary
+
+        - name: wait a few secs so replica sets finish initializing
+          pause:
+            seconds: 15
+
+    - name: create a users for RS
+      block:
+        - name: prepare the command to create root user
+          template:
+            src: templates/createRoot.js.j2
+            dest: /tmp/createRoot.js
+            mode: 0644
+          when: mongodb_primary is defined and mongodb_primary
+
+        - name: run the command to create a root user
+          shell: mongo admin {{ mongo_extra_args | default("") }} --port {{ rs_port }} < /tmp/createRoot.js
+          when: mongodb_primary is defined and mongodb_primary

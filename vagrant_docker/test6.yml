@@ -1,0 +1,17 @@
+---
+- hosts: dbs
+  become: false
+
+  gather_facts: true
+  gather_subset:
+    - "all_ipv4_addresses"
+
+  tasks:
+
+  - name: Show Gathered Facts
+    debug:
+      msg: "{{ ansible_facts.all_ipv4_addresses[0] }}"
+
+  - name: Show loop 
+    debug:
+      msg: "{{ ansible_loop.index }}"

@@ -1,0 +1,9 @@
+---
+- name: print long and short inventory name
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: print info
+      debug:
+        msg: "Host full name is {{ inventory_hostname }}. Short name is {{ inventory_hostname_short }}"
