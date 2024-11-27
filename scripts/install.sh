@@ -29,7 +29,7 @@ function fix_locales {
 }
 
 function isinstalled {
-  if yum list installed "$@" >/dev/null 2>&1; then
+  if dnf list installed "$@" >/dev/null 2>&1; then
     true
   else
     false
@@ -38,27 +38,27 @@ function isinstalled {
 
 function install_configure_packages {
     echo "${GREEN}Installing tools${RESET}"
-    sudo yum -d1 -q -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
+    sudo dnf -d1 -q -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
 
-    echo "${GREEN}Installing NPM${RESET}"
-    sudo curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
+#    echo "${GREEN}Installing NPM${RESET}"
+#    sudo curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
 
-    sudo yum -d1 -q -y install nodejs 
+#    sudo dnf -d1 -q -y install nodejs 
 
-    echo "${GREEN}Installing npm hosts tool${RESET}"
-    # install hosts tool to intelligently modify /etc/hosts
-    sudo npm config set loglevel warn
-    sudo npm install --global hosts.sh | true
-    sudo npm install --global sprintf-js | true
-    sudo npm install --global parse-key-value | true
+#    echo "${GREEN}Installing npm hosts tool${RESET}"
+#    # install hosts tool to intelligently modify /etc/hosts
+#    sudo npm config set loglevel warn
+#    sudo npm install --global hosts.sh | true
+#    sudo npm install --global sprintf-js | true
+#    sudo npm install --global parse-key-value | true
 
     # get our IP address
     # MY_IP=`ifconfig  | grep -E -o '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'`
     # export IP=$MY_IP
 
-    sed -i 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
+#    sed -i 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
 
-    sudo service sshd restart
+#    sudo service sshd restart
 }
 
 function load_postgres_sqlfiles {
@@ -146,9 +146,9 @@ function install_git_repos {
     su - ${DEPLOY_USER} -c "git clone https://github.com/gplv2/haproxy-postgresql.git"
 }
 
-function yum_update {
+function dnf_update {
     echo "${GREEN}Updating system${RESET}"
-    yum -d1 -q -y update
+    dnf -d1 -q -y update
     echo "${GREEN}Update done${RESET}"
 }
 
@@ -220,25 +220,30 @@ function install_configure_postgres {
     echo "${GREEN}Install PG specific packages ...${RESET}"
 
     echo "${GREEN}Install EPEL packages ...${RESET}"
-    sudo yum -d1 -q -y install sipcalc ccze yum-utils
+    #sudo dnf -d1 -q -y install sipcalc ccze dnf-utils
 
-    sudo yum -d1 -q -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    #sudo dnf -d1 -q -y install https://download.postgresql.org/pub/repos/dnf/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    sudo dnf -d1 -q -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
     echo "Disable stock postgresql..."
-    sudo yum-config-manager  --save --setopt=base.exclude=postgres* 1> /dev/null 2>&1
-    sudo yum-config-manager  --save --setopt=updates.exclude=postgres* 1> /dev/null 2>&1
+    sudo dnf -qy module disable postgresql
+    sudo dnf-config-manager  --save --setopt=base.exclude=postgres* 1> /dev/null 2>&1
+    sudo dnf-config-manager  --save --setopt=updates.exclude=postgres* 1> /dev/null 2>&1
+
+    sudo dnf update -y
 
     echo "Install PG ${PGVERSION} packages ..."
-    sudo yum-config-manager --enable pgdg${PGVERSION} 1> /dev/null 2>&1
+    sudo dnf-config-manager --enable pgdg${PGVERSION} 1> /dev/null 2>&1
 
-    sudo yum -d1 -q -y install postgresql${PGVERSION}.x86_64 postgresql${PGVERSION}-contrib.x86_64 postgresql${PGVERSION}-libs.x86_64 postgresql${PGVERSION}-server.x86_64 python36
+    sudo dnf install -y postgresql${PGVERSION}-server postgresql${PGVERSION}
+    #sudo dnf -d1 -q -y install postgresql${PGVERSION}.x86_64 postgresql${PGVERSION}-contrib.x86_64 postgresql${PGVERSION}-libs.x86_64 postgresql${PGVERSION}-server.x86_64 python36
 
     echo "Install PG ${PGVERSION} extensions ..."
-    sudo yum -d1 -q -y install repmgr_${PGVERSION}.x86_64 powa_${PGVERSION}.x86_64 pg_stat_kcache_${PGVERSION}.x86_64 pg_qualstats_${PGVERSION}.x86_64 pg_repack_${PGVERSION}.x86_64
-    #sudo yum -d1 -q -y install powa_${PGVERSION}-web.x86_64  # powaweb is not resolving ok in repo
+    sudo dnf -d1 -q -y install repmgr_${PGVERSION}.x86_64 powa_${PGVERSION}.x86_64 pg_stat_kcache_${PGVERSION}.x86_64 pg_qualstats_${PGVERSION}.x86_64 pg_repack_${PGVERSION}.x86_64
+    #sudo dnf -d1 -q -y install powa_${PGVERSION}-web.x86_64  # powaweb is not resolving ok in repo
 
     #echo "Install PG ${PGVERSION} barman cli ..."
-    #sudo yum -d1 -q -y install barman-cli
+    #sudo dnf -d1 -q -y install barman-cli
 
     echo "Init database ..."
     sudo /usr/pgsql-${PGVERSION}/bin/postgresql-${PGVERSION}-setup initdb
@@ -484,7 +489,7 @@ echo "${GREEN}Start provisioning postgresql ${RESET}"
 #fix_locales
 #create_deploy_user
 #install_extra_packages
-#yum_update
+#dnf_update
 install_configure_packages
 install_git_repos
 #make_work_dirs

@@ -13,20 +13,20 @@ CACHE=$(($(free -m|awk '/^Mem:/{print $2}')/3))
 PGEFFECTIVE=$(($(free -m|awk '/^Mem:/{print $2}')/2))
 
 # some defaults
-PROJECT_NAME=mycluster
+PROJECT_NAME=terumo
 PROJECT_DIRECTORY=/var/www/${PROJECT_NAME}
 DEPLOY_USER=vagrant
 
 # postgres
-PGVERSION=13
+PGVERSION=16
 PORT=6432
 PORT_BOUNCER=7432
 PORT_HAPROXY=5432
 
-PG_HBA_NET="192.168.88.0/24"
+PG_HBA_NET="192.168.56.0/24"
 
 # network range for keepalived (use escaped since we use sed to create templates
-MY_CIDR_IP="192.168.88.5\/24"
+MY_CIDR_IP="192.168.56.111\/21"
 
 # repmgr
 REPMGR_PASSWORD="ThaReplicator"

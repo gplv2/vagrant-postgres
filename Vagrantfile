@@ -1,9 +1,9 @@
 # -*- mode: ruby -*- vi: set ft=ruby :
 
-BOX_IMAGE = "bento/centos-7"
+BOX_IMAGE = "bento/rockylinux-9.4"
 #BOX_IMAGE = "centos/7"
-NODE_COUNT = 3
-IP_PREFIX="192.168.88."
+NODE_COUNT = 2
+IP_PREFIX="192.168.56."
 
 # create ip list for the nodes to use
 def this(file)
