@@ -254,7 +254,7 @@ function install_configure_postgres {
     sudo dnf install -y postgresql${PGVERSION}-server postgresql${PGVERSION}
 
     echo "Install PG ${PGVERSION} extensions ..."
-    sudo dnf -d1 -q -y install repmgr_${PGVERSION}.x86_64 powa_${PGVERSION}.x86_64 pg_stat_kcache_${PGVERSION}.x86_64 pg_qualstats_${PGVERSION}.x86_64 pg_repack_${PGVERSION}.x86_64
+    sudo dnf -d1 -y install repmgr_${PGVERSION}.x86_64 powa_${PGVERSION}.x86_64 pg_stat_kcache_${PGVERSION}.x86_64 pg_qualstats_${PGVERSION}.x86_64 pg_repack_${PGVERSION}.x86_64
     #sudo dnf -d1 -q -y install powa_${PGVERSION}-web.x86_64  # powaweb is not resolving ok in repo
 
     #echo "Install PG ${PGVERSION} barman cli ..."
@@ -295,23 +295,23 @@ function install_configure_postgres {
             else
                 shmall=`expr $phys_pages / 2`
                 shmmax=`expr $shmall \* $page_size`
-                echo "Maximum shared segment size in bytes: ${shmmax}"
+                postgres_shared=`expr $shmmax / 1024 / 1024 / 1000`
+                echo "Postgres shared buffer size in GB: ${postgres_shared}"
                 # converting this to a safe GB value for postgres
+                sed -i "s/shared_buffers = 128MB/shared_buffers = ${postgres_shared}GB/" ${PGCONF}
+                echo "Maximum shared segment size in bytes: ${shmmax}"
+                #  see scripts/variables for sizing calculations
                 sed -i -r "s|#?effective_cache_size =".*"$|effective_cache_size = ${PGEFFECTIVE}MB|" ${PGCONF}
 
-                postgres_shared=`expr $shmmax / 1024 / 1024 / 1000`
-
-                echo "Postgres shared buffer size in GB: ${postgres_shared}"
                 echo "Configuring memory settings"
-                sed -i "s/shared_buffers = 128MB/shared_buffers = ${postgres_shared}GB/" ${PGCONF}
                 sed -i "s/#port = 5432/port = ${PORT}/" ${PGCONF}
                 sed -i "s/#work_mem = 4MB/work_mem = 8MB/" ${PGCONF}
-                sed -i "s/#maintenance_work_mem = 64MB/maintenance_work_mem = 2048MB/" ${PGCONF}
+                sed -i "s/#maintenance_work_mem = 64MB/maintenance_work_mem = 1024MB/" ${PGCONF}
                 sed -i "s/#max_files_per_process = 1000/max_files_per_process = 10000/" ${PGCONF}
                 sed -i "s/#full_page_writes = on/full_page_writes = on/" ${PGCONF}
                 sed -i "s/#fsync = on/fsync = off/" ${PGCONF}
                 sed -i "s/#synchronous_commit = on/synchronous_commit = off/" ${PGCONF}
-                sed -i "s/#wal_level = minimal/wal_level = minimal/" ${PGCONF}
+                sed -i "s/#wal_level = minimal/wal_level = replica/" ${PGCONF}
                 sed -i "s/#temp_buffers = 8MB/temp_buffers = 32MB/" ${PGCONF}
                 echo "Configuring checkpoint settings"
                 sed -i "s/#checkpoint_timeout = 5min/checkpoint_timeout = 20min/" ${PGCONF}
@@ -334,6 +334,7 @@ function install_configure_postgres {
         if [ -e "${PGHBA}" ]; then
             #echo "host    all             all             $SUBNET           trust" >> /etc/postgresql/10/main/pg_hba.conf
             sed -i "s/host    all             all             127.0.0.1\/32            md5/#host    all             all             127.0.0.1\/32            md5/" ${PGHBA}
+            sed -i "s/host    all             all             127.0.0.1/32            scram-sha-256/#host    all             all             127.0.0.1/32            scram-sha-256/" ${PGHBA}
             echo "host    all             all             127.0.0.1/32           trust" >> ${PGHBA}
         fi
 
