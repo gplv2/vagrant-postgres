@@ -38,28 +38,26 @@ function isinstalled {
 
 function install_configure_packages {
     # not used now, too soon for some packages
-    echo "${GREEN}Installing tools${RESET}"
-    sudo dnf -d1 -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
+    echo "${GREEN}Installing node tool${RESET}"
 
-#    echo "${GREEN}Installing NPM${RESET}"
-#    sudo curl -sL https://rpm.nodesource.com/setup_14.x | sudo bash -
+     echo "${GREEN}Installing NPM${RESET}"
+     sudo curl -sL https://rpm.nodesource.com/setup_20.x | sudo bash -
 
-#    sudo dnf -d1 -q -y install nodejs 
+     sudo dnf -d1 -q -y install nodejs 
 
-#    echo "${GREEN}Installing npm hosts tool${RESET}"
-#    # install hosts tool to intelligently modify /etc/hosts
-#    sudo npm config set loglevel warn
-#    sudo npm install --global hosts.sh | true
-#    sudo npm install --global sprintf-js | true
-#    sudo npm install --global parse-key-value | true
+     echo "${GREEN}Installing npm hosts tool${RESET}"
+     # install hosts tool to intelligently modify /etc/hosts
+     sudo npm config set loglevel warn
+     sudo npm install --global hosts.sh | true
+     sudo npm install --global sprintf-js | true
+     sudo npm install --global parse-key-value | true
 
-    # get our IP address
-    # MY_IP=`ifconfig  | grep -E -o '(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)'`
-    # export IP=$MY_IP
+     # get our service IP address
+     MY_IP=$(ifconfig | sed -n '/^eth1:/,/^$/p' | grep -oP 'inet\s+\K[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+     # export IP=$MY_IP
 
-#    sed -i 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
-
-#    sudo service sshd restart
+     #sed -i 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
+     #sudo service sshd restart
 }
 
 function load_postgres_sqlfiles {
@@ -248,6 +246,7 @@ function install_configure_postgres {
 
     sudo systemctl enable --now pgbouncer
     sudo systemctl status pgbouncer
+    sudo systemctl stop pgbouncer
 
     echo "Install PG ${PGVERSION} packages ..."
     #sudo dnf-config-manager --enable pgdg${PGVERSION} 1> /dev/null 2>&1
@@ -515,7 +514,7 @@ create_pgpass
 add_ssh_opts
 add_psql_profile
 make_pg_sudoers
-#add_hosts
+add_hosts
 config_sysctl
 config_haproxy_generator
 configure_haproxy

@@ -35,7 +35,8 @@ function install_configure_pgbouncer {
     if ! isinstalled pgbouncer ; then
         echo "Installing Pgbouncer"
         sudo dnf -d1 -q -y install pgbouncer
-    }
+    fi
+
     # DB server
     echo "Configuring pgbouncer ..."
     #echo "Stopping pgbouncer if running"
