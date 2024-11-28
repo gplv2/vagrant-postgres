@@ -573,13 +573,6 @@ function make_pg_sudoers {
 
 echo "${GREEN}Start provisioning postgresql ${RESET}"
 
-
-IPRANGE=$(get_eth1_pg_hba_entry)
-
-echo $IPRANGE
-
-exit
-
 #fix_locales
 #create_deploy_user
 #install_extra_packages

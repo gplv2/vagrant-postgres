@@ -72,6 +72,8 @@ Vagrant.configure("2") do |config|
       #subconfig.vm.network "private_network", ip: "192.168.50.5"
       subconfig.vm.network :private_network, ip: IP_PREFIX+"#{i + 10}"
 
+      subconfig.vm.network "forwarded_port", host: "#{8182 + i}", guest: 8182
+
       scriptDir = File.dirname(__FILE__)
       localscriptDir = "/vagrant/scripts"
       dbUser = "postgres"

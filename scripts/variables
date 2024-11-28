@@ -26,7 +26,7 @@ PORT_HAPROXY=5432
 PG_HBA_NET="192.168.56.0/24"
 
 # network range for keepalived (use escaped since we use sed to create templates
-MY_CIDR_IP="192.168.56.111\/21"
+MY_CIDR_IP="192.168.56.111\/24"
 
 # repmgr
 REPMGR_PASSWORD="ThaReplicator"
