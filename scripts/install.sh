@@ -53,7 +53,7 @@ function install_configure_packages {
      sudo npm install --global parse-key-value | true
 
      # get our service IP address
-     MY_IP=$(ifconfig | sed -n '/^eth1:/,/^$/p' | grep -oP 'inet\s+\K[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
+     # MY_IP=$(ifconfig | sed -n '/^eth1:/,/^$/p' | grep -oP 'inet\s+\K[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+')
      # export IP=$MY_IP
 
      #sed -i 's/GSSAPIAuthentication yes/GSSAPIAuthentication no/g' /etc/ssh/sshd_config
@@ -214,39 +214,46 @@ function install_extra_packages {
     fi
 }
 
-function install_configure_postgres {
-    # DB server
-    echo "${GREEN}Install PG specific packages ...${RESET}"
-
+function install_epel_9 {
     echo "${GREEN}Install EPEL packages ...${RESET}"
     #sudo dnf -d1 -q -y install sipcalc ccze dnf-utils
 
     #sudo dnf -d1 -q -y install https://download.postgresql.org/pub/repos/dnf/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
     sudo dnf -d1 -q -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 
-    echo "Disable stock postgresql..."
-    sudo dnf -qy module disable postgresql
-    sudo dnf-config-manager  --save --setopt=base.exclude=postgres* 1> /dev/null 2>&1
-    sudo dnf-config-manager  --save --setopt=updates.exclude=postgres* 1> /dev/null 2>&1
-
     echo "Install EPEL release ..."
     sudo dnf install -y epel-release
     sudo dnf config-manager --set-enabled epel
 
+    echo "Running EPEL update ..."
     sudo dnf update -y
 
-    echo "Install Extra ${PGVERSION} packages ..."
+    echo "Install Extra packages ..."
     sudo dnf -d1 -y install haproxy keepalived pgbouncer git openssl curl wget net-tools psmisc tcpdump
 
+    echo "Haproxy ..."
     sudo systemctl enable --now haproxy
     sudo systemctl status haproxy
 
+    echo "Keepalived ..."
     sudo systemctl enable --now keepalived
     sudo systemctl status keepalived
 
+    echo "PG Bouncer ..."
     sudo systemctl enable --now pgbouncer
     sudo systemctl status pgbouncer
     sudo systemctl stop pgbouncer
+
+}
+
+function install_configure_postgres {
+    # DB server
+    echo "${GREEN}Install PG specific packages ...${RESET}"
+
+    echo "Disable stock postgresql..."
+    sudo dnf -qy module disable postgresql
+    #sudo dnf-config-manager  --save --setopt=base.exclude=postgres* 1> /dev/null 2>&1
+    #sudo dnf-config-manager  --save --setopt=updates.exclude=postgres* 1> /dev/null 2>&1
 
     echo "Install PG ${PGVERSION} packages ..."
     #sudo dnf-config-manager --enable pgdg${PGVERSION} 1> /dev/null 2>&1
@@ -512,7 +519,7 @@ function get_eth1_pg_hba_entry() {
 
   network_address=$(calculate_network_address "$eth1_ip" "$cidr")
 
-  if [ -z "$network_address" ]; then
+  if [ -z "${network_address}" ]; then
     echo "Error: Failed to calculate network address."
     return 1
   fi
@@ -520,7 +527,7 @@ function get_eth1_pg_hba_entry() {
   # Output results
   #echo "Local IP: $eth1_ip"
   #echo "pg_hba.conf Entry: $network_address"
-  return $network_address
+  return "${network_address}"
 }
 
 function config_haproxy_generator {
@@ -570,6 +577,7 @@ echo "${GREEN}Start provisioning postgresql ${RESET}"
 #create_deploy_user
 #install_extra_packages
 dnf_update
+install_epel_9
 install_configure_packages
 install_git_repos
 #make_work_dirs
