@@ -332,15 +332,15 @@ function install_configure_postgres {
 
         IPRANGE=$(get_eth1_pg_hba_entry)
 
-        local_line_number=$(grep -n "local   all             al" ${PGHBA} | head -n 1 | cut -d: -f1)
-        $line_to_insert="host    all             all             ${IPRANGE}           trust"
+        line_number=$(grep -n "local   all             al" ${PGHBA} | head -n 1 | cut -d: -f1)
+        line_to_insert="host    repmgr             repmgr             ${IPRANGE}           trust"
         # Check if the string was found
         if [ -n "$line_number" ]; then
             # Insert the line before the found line
-            sed -i "${line_number}a $line_to_insert" ${PGHBA}
-            echo "Inserted '$line_to_insert' at line $line_number in ${PGHBA}"
+            sed -i "${line_number}a ${line_to_insert}" ${PGHBA}
+            echo "Inserted '${line_to_insert}' at line ${line_number} in ${PGHBA}"
         else
-            echo "String '$search_string' not found in filename"
+            echo "Local line definition not found in ${PGHBA}"
         fi
 
         # set permissions

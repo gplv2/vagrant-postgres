@@ -118,8 +118,8 @@ Vagrant.configure("2") do |config|
       # subconfig.vm.disk :disk, size: "100GB", name: "extra_disk"
 
       subconfig.vm.provider "virtualbox" do |v|
-        v.customize ["modifyvm", :id, "--memory", 3076 ]
-        v.customize ["modifyvm", :id, "--cpus", 3 ]
+        v.customize ["modifyvm", :id, "--memory", 5120 ]
+        v.customize ["modifyvm", :id, "--cpus", 4 ]
         v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
         v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
         v.customize ["modifyvm", :id, "--ostype", "Centos_64"]
