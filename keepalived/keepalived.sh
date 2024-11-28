@@ -29,11 +29,32 @@ function isinstalled {
 echo "Preparing cluster for keepalived installation"
 
 function install_configure_keepalived {
+    if ! isinstalled keepalived ; then
+        echo "Keepalived not installed but it should be"
+        exit 1
+    fi
     # DB server
     echo "Configuring keepalived ..."
     echo "Stopping keepalived if running"
-    service keepalived stop
-    cp /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.orig
+
+    # Check if keepalived is running
+    if systemctl is-active --quiet keepalived; then
+        echo "keepalived is running. Stopping it now..."
+        sudo systemctl stop keepalived
+        if [ $? -eq 0 ]; then
+            echo "keepalived has been stopped successfully."
+        else
+            echo "Failed to stop keepalived."
+            exit 1
+        fi
+    else
+        echo "keepalived is not running."
+    fi
+
+    if [ -e /etc/keepalived/keepalived.conf ]; then
+        echo "Default config exists."
+        cp /etc/keepalived/keepalived.conf /etc/keepalived/keepalived.conf.orig
+    fi
 
     if [ "$MODE" = "master" ]; then
         echo "Configuring keepalived config file"
@@ -45,15 +66,13 @@ function install_configure_keepalived {
         cat ${SCRIPTS}/keepalived-template-standby.conf | sed -e "s/MY_MODE/BACKUP/ ; s/MY_CIDR/${MY_CIDR_IP}/" > ${SCRIPTS}keepalived-standby.conf
         cp ${SCRIPTS}/keepalived-standby.conf /etc/keepalived/keepalived.conf
     fi
-    echo "Enable keepalived"
-        sudo systemctl enable --now keepalived
     echo "Starting keepalived"
     service keepalived start
 }
 
 function enable_keepalived {
     if isinstalled keepalived ; then
-        systemctl enable keepalived
+        systemctl enable --now keepalived
     fi
 }
 
