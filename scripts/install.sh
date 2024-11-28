@@ -527,7 +527,7 @@ function get_eth1_pg_hba_entry() {
   # Output results
   #echo "Local IP: $eth1_ip"
   #echo "pg_hba.conf Entry: $network_address"
-  return "${network_address}"
+  echo ${network_address}
 }
 
 function config_haproxy_generator {
@@ -572,6 +572,13 @@ function make_pg_sudoers {
 }
 
 echo "${GREEN}Start provisioning postgresql ${RESET}"
+
+
+IPRANGE=$(get_eth1_pg_hba_entry)
+
+echo $IPRANGE
+
+exit
 
 #fix_locales
 #create_deploy_user
