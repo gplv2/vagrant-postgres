@@ -330,11 +330,24 @@ function install_configure_postgres {
         sudo su -l postgres -c "echo \"PGPORT=${PORT}\" >> .bash_profile"
         sudo su -l postgres -c "echo \"export PGPORT\" >> .bash_profile"
 
+        IPRANGE=$(get_eth1_pg_hba_entry)
+
+        local_line_number=$(grep -n "local   all             al" ${PGHBA} | head -n 1 | cut -d: -f1)
+        $line_to_insert="host    all             all             ${IPRANGE}           trust"
+        # Check if the string was found
+        if [ -n "$line_number" ]; then
+            # Insert the line before the found line
+            sed -i "${line_number}a $line_to_insert" ${PGHBA}
+            echo "Inserted '$line_to_insert' at line $line_number in ${PGHBA}"
+        else
+            echo "String '$search_string' not found in filename"
+        fi
+
         # set permissions
         if [ -e "${PGHBA}" ]; then
             #echo "host    all             all             $SUBNET           trust" >> /etc/postgresql/10/main/pg_hba.conf
             sed -i "s/host    all             all             127.0.0.1\/32            md5/#host    all             all             127.0.0.1\/32            md5/" ${PGHBA}
-            sed -i "s/host    all             all             127.0.0.1/32            scram-sha-256/#host    all             all             127.0.0.1/32            scram-sha-256/" ${PGHBA}
+            sed -i "s/host    all             all             127.0.0.1\/32            scram-sha-256/#host    all             all             127.0.0.1\/32            scram-sha-256/" ${PGHBA}
             echo "host    all             all             127.0.0.1/32           trust" >> ${PGHBA}
         fi
 
@@ -457,6 +470,57 @@ function config_sysctl {
         cat /vagrant/sys/add_sysctl.conf >> /etc/sysctl.conf
         sysctl -p
     fi
+}
+
+function get_eth1_pg_hba_entry() {
+  local interface="eth1"
+  local eth1_ip
+  local cidr
+  local network_address
+
+  # Get the IP of eth1 excluding the VIP
+  eth1_ip=$(ip -o -f inet addr show "$interface" | awk '{print $4}' | grep -E '^192\.168\.56\.' | cut -d/ -f1)
+
+  # Ensure eth1_ip is set and not empty
+  if [ -z "$eth1_ip" ]; then
+    echo "Error: Could not find a valid local IP for $interface."
+    return 1
+  fi
+
+  # Calculate the CIDR and network address for PostgreSQL pg_hba.conf
+  cidr=$(ip -o -f inet addr show "$interface" | awk '{print $4}' | grep -E '^192\.168\.56\.' | head -n 1 | cut -d/ -f2)
+
+  if [ -z "$cidr" ]; then
+    echo "Error: Could not determine CIDR for $interface."
+    return 1
+  fi
+
+  # Convert CIDR to network address
+  calculate_network_address() {
+    local ip="$1"
+    local prefix="$2"
+    local IFS=.
+    read -r i1 i2 i3 i4 <<<"$ip"
+    local mask=$((0xffffffff << (32 - prefix)))
+    printf "%d.%d.%d.%d/%d\n" \
+      $((i1 & (mask >> 24 & 0xff))) \
+      $((i2 & (mask >> 16 & 0xff))) \
+      $((i3 & (mask >> 8 & 0xff))) \
+      $((i4 & (mask & 0xff))) \
+      "$prefix"
+  }
+
+  network_address=$(calculate_network_address "$eth1_ip" "$cidr")
+
+  if [ -z "$network_address" ]; then
+    echo "Error: Failed to calculate network address."
+    return 1
+  fi
+
+  # Output results
+  #echo "Local IP: $eth1_ip"
+  #echo "pg_hba.conf Entry: $network_address"
+  return $network_address
 }
 
 function config_haproxy_generator {
